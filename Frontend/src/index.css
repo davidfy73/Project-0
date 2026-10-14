@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  /* Background */
+  --bg-primary: #0F1725;
+  --bg-secondary: #111C2B;
+  --bg-card: #162233;
+  --bg-elevated: #1D2A3D;
+
+  /* Royal Blue */
+  --accent-primary: #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-light: #93C5FD;
+  --accent-deep: #1E3A5F;
+  --accent-glow: rgba(59, 130, 246, 0.13);
+
+  /* Text */
+  --text-primary: #F1F5F9;
+  --text-secondary: #8FA2BD;
+  --text-muted: #64748B;
+  --text-on-accent: #FFFFFF;
+
+  /* Borders */
+  --border-primary: #253246;
+  --border-secondary: #334155;
+  --progress-track: #37465D;
+
+  /* Status */
+  --color-success: #20C997;
+  --color-warning: #FBBF24;
+  --color-danger: #FF5B64;
+  --color-purple: #C86BFF;
+  --color-info: #60A5FA;
+
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+}
+
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-card: var(--bg-card);
+  --color-bg-elevated: var(--bg-elevated);
+
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-glow: var(--accent-glow);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-on-accent: var(--text-on-accent);
+
+  --color-border-primary: var(--border-primary);
+  --color-border-secondary: var(--border-secondary);
+
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-purple: var(--color-purple);
+  --color-info: var(--color-info);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100svh;
+}
