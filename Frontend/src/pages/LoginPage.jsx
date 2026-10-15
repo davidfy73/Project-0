@@ -1,16 +1,20 @@
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Shield } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { login } = useAuthStore();
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Backend integration akan dilakukan di tahap berikutnya
-    console.log('Login attempt:', { email, password, rememberMe });
+    login({ email });
+    navigate('/dashboard');
   };
 
   return (
@@ -188,15 +192,15 @@ export default function LoginPage() {
                 Remember me
               </span>
             </label>
-            <a
-              href="/forgot-password"
+            <Link
+              to="/forgot-password"
               className="text-sm font-medium no-underline transition-colors duration-200"
               style={{ color: 'var(--accent-primary)' }}
               onMouseOver={(e) => (e.target.style.color = 'var(--accent-light)')}
               onMouseOut={(e) => (e.target.style.color = 'var(--accent-primary)')}
             >
               Forgot password?
-            </a>
+            </Link>
           </div>
 
           {/* Sign In Button */}
@@ -224,15 +228,15 @@ export default function LoginPage() {
         {/* Sign up link */}
         <p className="text-center text-sm mt-6" style={{ color: 'var(--text-secondary)' }}>
           Don't have an account?{' '}
-          <a
-            href="/register"
+          <Link
+            to="/register"
             className="font-semibold no-underline transition-colors duration-200"
             style={{ color: 'var(--accent-primary)' }}
             onMouseOver={(e) => (e.target.style.color = 'var(--accent-light)')}
             onMouseOut={(e) => (e.target.style.color = 'var(--accent-primary)')}
           >
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>
