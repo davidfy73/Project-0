@@ -10,7 +10,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-const PREVENTIF_LIST = [
+const PREVENTIVE_LIST = [
   {
     id: 'strong-password',
     title: 'Use Strong Password',
@@ -55,14 +55,14 @@ const PREVENTIF_LIST = [
   },
 ];
 
-export default function PreventifPage() {
+export default function PreventivePage() {
   return (
     <div className="space-y-6 animate-in fade-in">
       <div className="border-b pb-4" style={{ borderColor: 'var(--border-primary)' }}>
         <div className="flex items-center gap-2 mb-1">
           <ShieldCheck size={20} style={{ color: 'var(--color-success)' }} />
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            Preventif
+            Preventive
           </h1>
         </div>
         <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -71,7 +71,7 @@ export default function PreventifPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {PREVENTIF_LIST.map((item, idx) => {
+        {PREVENTIVE_LIST.map((item, idx) => {
           const Icon = item.icon;
           return (
             <div

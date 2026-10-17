@@ -41,7 +41,7 @@ export default function QuizPage() {
           </h2>
           <p className="text-xs sm:text-sm max-w-lg mx-auto leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
             Sistem akan mengacak 15 soal pilihan ganda dari bank soal (kombinasi materi Module dan
-            Preventif). Hasil penilaian dan penjelasan akan langsung diberikan setelah Anda menjawab.
+            Preventive). Hasil penilaian dan penjelasan akan langsung diberikan setelah Anda menjawab.
           </p>
         </div>
 

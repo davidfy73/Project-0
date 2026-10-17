@@ -13,7 +13,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 
-const PREVENTIF_TOPICS = [
+const PREVENTIVE_TOPICS = [
   { id: 'password', title: 'Use Strong Password', icon: KeyRound, done: true },
   { id: 'check-url', title: 'Check URL', icon: Link2, done: true },
   { id: 'antivirus', title: 'Use Antivirus', icon: Shield, done: true },
@@ -23,14 +23,14 @@ const PREVENTIF_TOPICS = [
   { id: 'update-patch', title: 'Update & Patch', icon: RefreshCw, done: true },
 ];
 
-export default function PreventifOverview() {
+export default function PreventiveOverview() {
   const navigate = useNavigate();
-  const completedCount = PREVENTIF_TOPICS.filter((t) => t.done).length;
-  const percentage = Math.round((completedCount / PREVENTIF_TOPICS.length) * 100);
+  const completedCount = PREVENTIVE_TOPICS.filter((t) => t.done).length;
+  const percentage = Math.round((completedCount / PREVENTIVE_TOPICS.length) * 100);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* 7 Preventif Checklist Card */}
+      {/* 7 Preventive Checklist Card */}
       <div
         className="lg:col-span-2 rounded-2xl p-6 transition-all"
         style={{
@@ -42,7 +42,7 @@ export default function PreventifOverview() {
           <div>
             <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
               <ShieldCheck size={20} style={{ color: 'var(--color-success)' }} />
-              <span>Panduan Preventif (7 Topik Keamanan)</span>
+              <span>Panduan Preventive (7 Topik Keamanan)</span>
             </h3>
             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
               Tindakan pencegahan dan best practices pertahanan siber
@@ -50,7 +50,7 @@ export default function PreventifOverview() {
           </div>
           <button
             type="button"
-            onClick={() => navigate('/preventif')}
+            onClick={() => navigate('/preventive')}
             className="text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
             style={{ color: 'var(--accent-primary)' }}
             onMouseOver={(e) => (e.currentTarget.style.color = 'var(--accent-light)')}
@@ -62,12 +62,12 @@ export default function PreventifOverview() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {PREVENTIF_TOPICS.map((topic) => {
+          {PREVENTIVE_TOPICS.map((topic) => {
             const Icon = topic.icon;
             return (
               <div
                 key={topic.id}
-                onClick={() => navigate('/preventif')}
+                onClick={() => navigate('/preventive')}
                 className="flex items-center justify-between p-3 rounded-xl cursor-pointer transition-colors"
                 style={{
                   backgroundColor: 'var(--bg-elevated)',
@@ -140,7 +140,7 @@ export default function PreventifOverview() {
           </h3>
           <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
             Uji pemahaman Anda dengan 15 soal pilihan ganda acak dari bank soal materi Module dan
-            Preventif.
+            Preventive.
           </p>
 
           <div

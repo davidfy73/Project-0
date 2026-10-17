@@ -6,15 +6,13 @@ import {
   HelpCircle,
   Info,
   LogOut,
-  ShieldAlert,
-  Zap,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 
 const NAV_ITEMS = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'Module', path: '/modules', icon: BookOpen },
-  { name: 'Preventif', path: '/preventif', icon: ShieldCheck },
+  { name: 'Preventive', path: '/preventive', icon: ShieldCheck },
   { name: 'Quiz', path: '/quiz', icon: HelpCircle },
   { name: 'About', path: '/about', icon: Info },
 ];
@@ -85,39 +83,8 @@ export default function Sidebar({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Bottom section: Engine status & Logout */}
-        <div className="space-y-3 pt-4 border-t" style={{ borderColor: 'var(--border-primary)' }}>
-          {/* Cyber engine status card (styled after sidebar widget in WEB APP.png) */}
-          <div
-            className="p-3.5 rounded-xl relative overflow-hidden"
-            style={{
-              backgroundColor: 'var(--bg-card)',
-              border: '1px solid var(--border-primary)',
-            }}
-          >
-            <div className="flex items-center gap-2 mb-1.5">
-              <Zap size={14} style={{ color: 'var(--accent-primary)' }} />
-              <span
-                className="text-xs font-semibold"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                VirusTotal Engine
-              </span>
-            </div>
-            <p className="text-[11px] leading-relaxed mb-2" style={{ color: 'var(--text-muted)' }}>
-              Connected via secure API layer for real-time cyber triage.
-            </p>
-            <div className="flex items-center gap-2">
-              <span
-                className="w-2 h-2 rounded-full animate-pulse"
-                style={{ backgroundColor: 'var(--color-success)' }}
-              />
-              <span className="text-[10px] font-mono" style={{ color: 'var(--color-success)' }}>
-                System Ready (v1.0)
-              </span>
-            </div>
-          </div>
-
+        {/* Bottom section: Logout */}
+        <div className="pt-4 border-t" style={{ borderColor: 'var(--border-primary)' }}>
           {/* Logout button */}
           <button
             type="button"

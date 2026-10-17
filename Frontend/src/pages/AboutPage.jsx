@@ -11,7 +11,7 @@ export default function AboutPage() {
           </h1>
         </div>
         <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Platform edukasi ancaman dan pertahanan siber untuk pemula.
+          Platform Threat Intelligence & Interactive Learning.
         </p>
       </div>
 
@@ -52,7 +52,7 @@ export default function AboutPage() {
           </p>
           <p>
             Tujuan utama platform ini adalah membantu pengguna pemula memahami anatomi serangan digital lewat
-            materi komprehensif, menerapkan langkah-langkah preventif esensial, serta menguji pemahaman
+            materi komprehensif, menerapkan langkah-langkah preventive esensial, serta menguji pemahaman
             mereka melalui evaluasi kuis terukur.
           </p>
         </div>
@@ -118,7 +118,7 @@ export default function AboutPage() {
               }}
             >
               <h4 className="font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
-                4. Langkah Preventif (7 Topik)
+                4. Langkah Preventive (7 Topik)
               </h4>
               <p style={{ color: 'var(--text-secondary)' }}>
                 Panduan aksi nyata, kesalahan umum, dan pencegahan risiko keamanan harian.

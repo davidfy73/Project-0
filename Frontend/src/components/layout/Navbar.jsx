@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Shield, User, LogOut, Menu, X, Bell } from 'lucide-react';
+import { Search, Shield, User, LogOut, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 
 export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
@@ -98,25 +98,8 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
         </div>
       </form>
 
-      {/* Right: Notifications & Profile Menu */}
+      {/* Right: Profile Menu */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Notification pill */}
-        <div
-          className="w-9 h-9 rounded-lg hidden sm:flex items-center justify-center relative cursor-pointer"
-          style={{
-            backgroundColor: 'var(--bg-card)',
-            border: '1px solid var(--border-primary)',
-            color: 'var(--text-secondary)',
-          }}
-          title="No unread alerts"
-        >
-          <Bell size={17} />
-          <span
-            className="absolute top-2 right-2 w-2 h-2 rounded-full"
-            style={{ backgroundColor: 'var(--accent-primary)' }}
-          />
-        </div>
-
         {/* Profile dropdown */}
         <div className="relative">
           <button

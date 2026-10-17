@@ -4,7 +4,7 @@ import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import DashboardPage from './pages/DashboardPage';
 import ModulesPage from './pages/ModulesPage';
-import PreventifPage from './pages/PreventifPage';
+import PreventivePage from './pages/PreventivePage';
 import QuizPage from './pages/QuizPage';
 import AboutPage from './pages/AboutPage';
 import AppLayout from './components/layout/AppLayout';
@@ -38,7 +38,8 @@ function App() {
         >
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/modules" element={<ModulesPage />} />
-          <Route path="/preventif" element={<PreventifPage />} />
+          <Route path="/preventive" element={<PreventivePage />} />
+          <Route path="/preventif" element={<Navigate to="/preventive" replace />} />
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/about" element={<AboutPage />} />
         </Route>
