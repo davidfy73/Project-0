@@ -316,41 +316,6 @@ export default function ScannerSection() {
                   <span>{isScanning ? 'Analyzing...' : 'Scan URL'}</span>
                 </button>
               </div>
-
-              {/* Quick sample demo pills */}
-              <div className="flex flex-wrap items-center gap-2 text-xs pt-1">
-                <span style={{ color: 'var(--text-muted)' }}>Quick Demos:</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUrlInput('http://paypal-security-alert-center.tk/verify');
-                    handleStartScan('URL', 'http://paypal-security-alert-center.tk/verify');
-                  }}
-                  className="px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors cursor-pointer"
-                  style={{
-                    backgroundColor: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-secondary)',
-                    color: 'var(--color-danger)',
-                  }}
-                >
-                  ⚡ Sample Phishing URL
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUrlInput('https://github.com');
-                    handleStartScan('URL', 'https://github.com');
-                  }}
-                  className="px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors cursor-pointer"
-                  style={{
-                    backgroundColor: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-secondary)',
-                    color: 'var(--color-success)',
-                  }}
-                >
-                  ✓ Sample Clean URL
-                </button>
-              </div>
             </div>
           )}
 
@@ -493,43 +458,6 @@ export default function ScannerSection() {
                 >
                   <Search size={16} />
                   <span>{isScanning ? 'Searching...' : 'Search'}</span>
-                </button>
-              </div>
-
-              {/* Preset hash or IP pills */}
-              <div className="flex flex-wrap items-center gap-2 text-xs pt-1">
-                <span style={{ color: 'var(--text-muted)' }}>Quick Examples:</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const hash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
-                    setSearchInput(hash);
-                    handleStartScan('SEARCH', hash);
-                  }}
-                  className="px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors cursor-pointer"
-                  style={{
-                    backgroundColor: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-secondary)',
-                    color: 'var(--accent-light)',
-                  }}
-                >
-                  # Ransomware SHA-256
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const ip = '185.220.101.5';
-                    setSearchInput(ip);
-                    handleStartScan('SEARCH', ip);
-                  }}
-                  className="px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors cursor-pointer"
-                  style={{
-                    backgroundColor: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-secondary)',
-                    color: 'var(--color-warning)',
-                  }}
-                >
-                  # Suspicious IP (185.220.101.5)
                 </button>
               </div>
             </div>
