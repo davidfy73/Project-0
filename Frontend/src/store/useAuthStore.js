@@ -6,6 +6,12 @@ export const useAuthStore = create((set) => ({
     username: 'SecurityAnalyst',
     email: 'analyst@phishyearn.local',
     role: 'Trainee',
+    progress: {
+      modulesRead: 4,
+      totalModules: 6,
+      preventiveRead: 5,
+      totalPreventive: 7,
+    },
   },
   login: (userData) =>
     set({
@@ -14,6 +20,12 @@ export const useAuthStore = create((set) => ({
         username: userData?.email?.split('@')[0] || 'SecurityAnalyst',
         email: userData?.email || 'analyst@phishyearn.local',
         role: 'Trainee',
+        progress: {
+          modulesRead: 4,
+          totalModules: 6,
+          preventiveRead: 5,
+          totalPreventive: 7,
+        },
       },
     }),
   logout: () => set({ isAuthenticated: false, user: null }),
