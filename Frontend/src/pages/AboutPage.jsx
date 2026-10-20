@@ -86,23 +86,14 @@ export default function AboutPage() {
         </p>
       </div>
 
-      {/* 2. Section "Yang bisa kamu lakukan" */}
+      {/* 2. Section "Toolkit" */}
       <div className="space-y-5">
         <div>
-          <span
-            className="text-xs font-semibold tracking-wider block mb-1"
-            style={{
-              color: 'var(--accent-primary)',
-              fontFamily: 'var(--font-mono)',
-            }}
-          >
-            // fitur
-          </span>
           <h2
-            className="text-xl sm:text-2xl font-bold tracking-tight"
-            style={{ color: 'var(--text-primary)' }}
+            className="text-xl sm:text-2xl font-bold uppercase tracking-wider"
+            style={{ color: 'var(--accent-primary)' }}
           >
-            Yang bisa kamu lakukan
+            TOOLKIT
           </h2>
         </div>
 
@@ -155,23 +146,14 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* 3. Section "Cara belajar" */}
+      {/* 3. Section "Learning Path" */}
       <div className="space-y-5">
         <div>
-          <span
-            className="text-xs font-semibold tracking-wider block mb-1"
-            style={{
-              color: 'var(--accent-primary)',
-              fontFamily: 'var(--font-mono)',
-            }}
-          >
-            // langkah
-          </span>
           <h2
-            className="text-xl sm:text-2xl font-bold tracking-tight"
-            style={{ color: 'var(--text-primary)' }}
+            className="text-xl sm:text-2xl font-bold uppercase tracking-wider"
+            style={{ color: 'var(--accent-primary)' }}
           >
-            Cara belajar
+            LEARNING PATH
           </h2>
         </div>
 
