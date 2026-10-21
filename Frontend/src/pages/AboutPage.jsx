@@ -3,7 +3,7 @@ import { Shield, Search, BookOpen, ShieldCheck, HelpCircle } from 'lucide-react'
 const FEATURES = [
   {
     icon: Search,
-    title: 'Scanner Ancaman',
+    title: 'Dashboard',
     desc: 'Periksa URL, file, atau hash/domain/IP untuk melihat apakah aman.',
   },
   {

@@ -9,7 +9,7 @@ export default function AppLayout() {
 
   return (
     <div
-      className="min-h-svh flex flex-col"
+      className="h-screen flex flex-col overflow-hidden"
       style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
     >
       <Navbar
@@ -17,13 +17,13 @@ export default function AppLayout() {
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0 relative">
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 flex flex-col justify-between">
+        <main className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-6 lg:p-8 flex flex-col justify-between">
           <div className="max-w-7xl w-full mx-auto space-y-6">
             <Outlet />
           </div>

@@ -14,43 +14,43 @@ const PREVENTIVE_LIST = [
   {
     id: 'strong-password',
     title: 'Use Strong Password',
-    desc: 'Membuat password kompleks, penggunaan password manager, dan aktivasi Multi-Factor Authentication (MFA).',
+    desc: 'Gunakan password kuat dan unik, password manager, serta aktifkan MFA.',
     icon: KeyRound,
   },
   {
     id: 'check-url',
     title: 'Check URL',
-    desc: 'Menganalisis domain palsu, typosquatting, IDN homograph attack, dan sertifikat SSL/TLS.',
+    desc: 'Periksa alamat situs untuk menghindari domain palsu dan tautan berbahaya.',
     icon: Link2,
   },
   {
     id: 'antivirus',
     title: 'Use Antivirus',
-    desc: 'Prinsip kerja perlindungan real-time, update database definisi virus, dan heuristic scanning.',
+    desc: 'Gunakan antivirus yang aktif dan terbaru untuk mendeteksi serta mencegah malware.',
     icon: Shield,
   },
   {
     id: 'backup-data',
     title: 'Backup Data',
-    desc: 'Aturan 3-2-1 backup untuk mengamankan data penting dari serangan ransomware dan kerusakan perangkat.',
+    desc: 'Cadangkan data secara berkala dengan strategi 3-2-1 agar mudah dipulihkan.',
     icon: HardDriveDownload,
   },
   {
     id: 'use-vpn',
     title: 'Use VPN',
-    desc: 'Enkripsi data tunneling saat terhubung ke jaringan Wi-Fi publik tanpa proteksi.',
+    desc: 'Gunakan VPN untuk mengenkripsi koneksi dan meningkatkan privasi saat online.',
     icon: Wifi,
   },
   {
     id: 'verify-identity',
     title: 'Verify Identity',
-    desc: 'Memvalidasi identitas pengirim pesan melalui saluran terpisah sebelum mengirim data rahasia.',
+    desc: 'Verifikasi identitas pengirim sebelum membagikan data atau menyetujui permintaan.',
     icon: UserCheck,
   },
   {
     id: 'update-patch',
     title: 'Update & Patch',
-    desc: 'Pentingnya segera memasang security patch sistem operasi dan aplikasi untuk menutup CVE aktif.',
+    desc: 'Perbarui sistem dan aplikasi secara berkala untuk menutup celah keamanan.',
     icon: RefreshCw,
   },
 ];
@@ -65,9 +65,6 @@ export default function PreventivePage() {
             Preventive
           </h1>
         </div>
-        <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
-          7 Panduan pencegahan: Kenapa penting, langkah praktis, dan kesalahan umum.
-        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

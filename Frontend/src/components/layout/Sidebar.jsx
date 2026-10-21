@@ -38,17 +38,16 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {/* Sidebar container */}
       <aside
-        className={`fixed lg:static top-16 bottom-0 left-0 z-40 w-64 flex flex-col justify-between p-4 transition-transform duration-300 ease-in-out border-r ${
+        className={`fixed lg:static top-16 bottom-0 left-0 z-40 w-64 h-[calc(100vh-4rem)] lg:h-full shrink-0 flex flex-col p-4 transition-transform duration-300 ease-in-out border-r ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
         style={{
           backgroundColor: 'var(--bg-secondary)',
           borderColor: 'var(--border-primary)',
-          height: 'calc(100svh - 4rem)',
         }}
       >
-        {/* Navigation list */}
-        <div className="space-y-6">
+        {/* Navigation list (scrollable if screen height is small) */}
+        <div className="flex-1 overflow-y-auto space-y-6">
           <div className="px-2">
             <p
               className="text-[11px] font-semibold uppercase tracking-wider mb-3"
@@ -83,8 +82,8 @@ export default function Sidebar({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Bottom section: Logout */}
-        <div className="pt-4 border-t" style={{ borderColor: 'var(--border-primary)' }}>
+        {/* Bottom section: Logout (pinned to bottom with mt-auto) */}
+        <div className="mt-auto pt-4 border-t shrink-0" style={{ borderColor: 'var(--border-primary)' }}>
           {/* Logout button */}
           <button
             type="button"

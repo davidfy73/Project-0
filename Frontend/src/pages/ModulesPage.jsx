@@ -4,42 +4,42 @@ const MODULES = [
   {
     id: 'phishing',
     title: 'Phishing',
-    desc: 'Pengertian, cara kerja, contoh kasus, tanda-tanda, dan dampak manipulasi data lewat situs atau pesan tiruan.',
+    desc: 'Kenali email, pesan, dan situs palsu yang bertujuan mencuri informasi sensitif.',
     icon: ShieldAlert,
     tag: 'Module 01',
   },
   {
     id: 'malware',
     title: 'Malware',
-    desc: 'Klasifikasi virus, worm, trojan, spyware, dan cara mereka menginfeksi sistem operasi.',
+    desc: 'Pelajari jenis malware, cara penyebarannya, dan dampaknya terhadap perangkat.',
     icon: Bug,
     tag: 'Module 02',
   },
   {
     id: 'ransomware',
     title: 'Ransomware',
-    desc: 'Mekanisme enkripsi berkas, permintaan tebusan cryptocurrency, dan strategi pemulihan bencana.',
+    desc: 'Pahami cara ransomware mengunci data serta metode pencegahan dan pemulihannya.',
     icon: Lock,
     tag: 'Module 03',
   },
   {
     id: 'mitm',
     title: 'Man-in-the-Middle (MITM)',
-    desc: 'Penyadapan paket data unencrypted pada public Wi-Fi, SSL stripping, dan teknik spoofing.',
+    desc: 'Pelajari cara penyerang menyadap komunikasi dan mencuri data melalui koneksi tidak aman.',
     icon: Network,
     tag: 'Module 04',
   },
   {
     id: 'social-engineering',
     title: 'Social Engineering',
-    desc: 'Eksploitasi celah psikologis manusia melalui pretexting, baiting, shoulder surfing, dan vishing.',
+    desc: 'Kenali teknik manipulasi psikologis yang digunakan untuk menipu korban dan mencuri informasi.',
     icon: Users,
     tag: 'Module 05',
   },
   {
     id: 'clickjacking',
     title: 'Clickjacking',
-    desc: 'Eksploitasi antarmuka pengguna (UI redress) menggunakan transparansi iframe untuk membajak klik korban.',
+    desc: 'Pahami cara antarmuka web menipu pengguna agar melakukan tindakan tanpa disadari.',
     icon: MousePointerClick,
     tag: 'Module 06',
   },
@@ -55,9 +55,6 @@ export default function ModulesPage() {
             Modules
           </h1>
         </div>
-        <p className="text-xs sm:text-sm" style={{ color: 'var(--text-secondary)' }}>
-          6 Materi pembelajaran komprehensif ancaman siber berbasis Markdown.
-        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
