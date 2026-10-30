@@ -46,7 +46,6 @@ export default function AboutPage() {
     <div className="max-w-5xl mx-auto space-y-12 sm:space-y-16 pb-8 animate-in fade-in">
       {/* 1. Hero Section */}
       <div className="text-center pt-2 sm:pt-4">
-        {/* Logo Shield dengan Glow Lembut */}
         <div
           className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-6 transition-transform duration-300 hover:scale-105"
           style={{
@@ -58,7 +57,6 @@ export default function AboutPage() {
           <Shield className="w-8 h-8 sm:w-10 sm:h-10" style={{ color: 'var(--accent-primary)' }} />
         </div>
 
-        {/* Judul Monospace */}
         <h1
           className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-widest mb-3"
           style={{
@@ -69,7 +67,6 @@ export default function AboutPage() {
           PHISHYEARN
         </h1>
 
-        {/* Tagline */}
         <p
           className="text-sm sm:text-base md:text-lg font-medium mb-4"
           style={{ color: 'var(--accent-light)' }}
@@ -77,7 +74,6 @@ export default function AboutPage() {
           Belajar keamanan siber dengan cara yang simpel
         </p>
 
-        {/* Paragraf Pendek */}
         <p
           className="max-w-2xl mx-auto text-xs sm:text-sm md:text-base leading-relaxed px-2"
           style={{ color: 'var(--text-secondary)' }}

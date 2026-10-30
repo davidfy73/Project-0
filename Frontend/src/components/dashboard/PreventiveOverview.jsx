@@ -42,7 +42,7 @@ export default function PreventiveOverview() {
           <div>
             <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
               <ShieldCheck size={20} style={{ color: 'var(--color-success)' }} />
-              <span>Panduan Preventive (7 Topik Keamanan)</span>
+              <span>Panduan Preventive (7 Topic Keamanan)</span>
             </h3>
             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
               Tindakan pencegahan dan best practices pertahanan siber

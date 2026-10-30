@@ -1,19 +1,39 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Eye, EyeOff, Shield } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 
+const registerSchema = z.object({
+  username: z
+    .string()
+    .min(1, 'Username wajib diisi')
+    .min(3, 'Username minimal 3 karakter')
+    .max(20, 'Username maksimal 20 karakter')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Hanya boleh huruf, angka, dan underscore'),
+  password: z
+    .string()
+    .min(1, 'Password wajib diisi')
+    .min(8, 'Password minimal 8 karakter'),
+});
+
 export default function RegisterPage() {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    login({ email, username });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+  });
+
+  const onSubmit = (data) => {
+    login({ username: data.username });
     navigate('/dashboard');
   };
 
@@ -83,85 +103,68 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+            <label
+              htmlFor="register-username"
+              className="block text-sm font-medium mb-1.5"
+              style={{ color: 'var(--text-secondary)' }}
+            >
               Username
             </label>
             <input
+              id="register-username"
               type="text"
-              required
               placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              {...register('username')}
               className="w-full h-11 px-4 rounded-lg text-sm outline-none transition-all duration-200"
               style={{
                 backgroundColor: 'var(--bg-elevated)',
-                border: '1px solid var(--border-primary)',
+                border: `1px solid ${errors.username ? 'var(--color-danger)' : 'var(--border-primary)'}`,
                 color: 'var(--text-primary)',
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = 'var(--accent-primary)';
+                e.target.style.borderColor = errors.username ? 'var(--color-danger)' : 'var(--accent-primary)';
                 e.target.style.boxShadow = '0 0 0 3px var(--accent-glow)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = 'var(--border-primary)';
+                e.target.style.borderColor = errors.username ? 'var(--color-danger)' : 'var(--border-primary)';
                 e.target.style.boxShadow = 'none';
               }}
             />
+            {errors.username && (
+              <p className="text-xs mt-1.5" style={{ color: 'var(--color-danger)' }}>
+                {errors.username.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
-              Email
-            </label>
-            <input
-              type="email"
-              required
-              placeholder="Enter your Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-11 px-4 rounded-lg text-sm outline-none transition-all duration-200"
-              style={{
-                backgroundColor: 'var(--bg-elevated)',
-                border: '1px solid var(--border-primary)',
-                color: 'var(--text-primary)',
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = 'var(--accent-primary)';
-                e.target.style.boxShadow = '0 0 0 3px var(--accent-glow)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = 'var(--border-primary)';
-                e.target.style.boxShadow = 'none';
-              }}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+            <label
+              htmlFor="register-password"
+              className="block text-sm font-medium mb-1.5"
+              style={{ color: 'var(--text-secondary)' }}
+            >
               Password
             </label>
             <div className="relative">
               <input
+                id="register-password"
                 type={showPassword ? 'text' : 'password'}
-                required
                 placeholder="Create Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register('password')}
                 className="w-full h-11 px-4 pr-11 rounded-lg text-sm outline-none transition-all duration-200"
                 style={{
                   backgroundColor: 'var(--bg-elevated)',
-                  border: '1px solid var(--border-primary)',
+                  border: `1px solid ${errors.password ? 'var(--color-danger)' : 'var(--border-primary)'}`,
                   color: 'var(--text-primary)',
                 }}
                 onFocus={(e) => {
-                  e.target.style.borderColor = 'var(--accent-primary)';
+                  e.target.style.borderColor = errors.password ? 'var(--color-danger)' : 'var(--accent-primary)';
                   e.target.style.boxShadow = '0 0 0 3px var(--accent-glow)';
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = 'var(--border-primary)';
+                  e.target.style.borderColor = errors.password ? 'var(--color-danger)' : 'var(--border-primary)';
                   e.target.style.boxShadow = 'none';
                 }}
               />
@@ -170,10 +173,16 @@ export default function RegisterPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
                 style={{ color: 'var(--text-muted)' }}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-xs mt-1.5" style={{ color: 'var(--color-danger)' }}>
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
           <button
@@ -182,6 +191,7 @@ export default function RegisterPage() {
             style={{
               backgroundColor: 'var(--accent-primary)',
               color: 'var(--text-on-accent)',
+              border: 'none',
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
@@ -200,8 +210,10 @@ export default function RegisterPage() {
           Already have an account?{' '}
           <Link
             to="/login"
-            className="font-semibold no-underline"
+            className="font-semibold no-underline transition-colors duration-200"
             style={{ color: 'var(--accent-primary)' }}
+            onMouseOver={(e) => (e.target.style.color = 'var(--accent-light)')}
+            onMouseOut={(e) => (e.target.style.color = 'var(--accent-primary)')}
           >
             Sign in
           </Link>

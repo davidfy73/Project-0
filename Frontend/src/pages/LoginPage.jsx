@@ -1,19 +1,39 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Eye, EyeOff, Shield } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 
+const loginSchema = z.object({
+  username: z
+    .string()
+    .min(1, 'Username wajib diisi')
+    .min(3, 'Username minimal 3 karakter')
+    .max(20, 'Username maksimal 20 karakter')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Hanya boleh huruf, angka, dan underscore'),
+  password: z
+    .string()
+    .min(1, 'Password wajib diisi')
+    .min(8, 'Password minimal 8 karakter'),
+});
+
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const { login } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    login({ email });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = (data) => {
+    login({ username: data.username });
     navigate('/dashboard');
   };
 
@@ -83,41 +103,42 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
           <div>
             <label
-              htmlFor="email"
+              htmlFor="username"
               className="block text-sm font-medium mb-2"
               style={{ color: 'var(--text-secondary)' }}
             >
-              Email
+              Username
             </label>
             <input
-              id="email"
-              type="email"
-              placeholder="Enter your Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              type="text"
+              placeholder="Enter your username"
+              {...register('username')}
               className="w-full h-11 px-4 rounded-lg text-sm outline-none transition-all duration-200"
               style={{
                 backgroundColor: 'var(--bg-elevated)',
-                border: '1px solid var(--border-primary)',
+                border: `1px solid ${errors.username ? 'var(--color-danger)' : 'var(--border-primary)'}`,
                 color: 'var(--text-primary)',
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = 'var(--accent-primary)';
+                e.target.style.borderColor = errors.username ? 'var(--color-danger)' : 'var(--accent-primary)';
                 e.target.style.boxShadow = '0 0 0 3px var(--accent-glow)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = 'var(--border-primary)';
+                e.target.style.borderColor = errors.username ? 'var(--color-danger)' : 'var(--border-primary)';
                 e.target.style.boxShadow = 'none';
               }}
             />
+            {errors.username && (
+              <p className="text-xs mt-1.5" style={{ color: 'var(--color-danger)' }}>
+                {errors.username.message}
+              </p>
+            )}
           </div>
 
-          {/* Password */}
           <div>
             <label
               htmlFor="password"
@@ -131,20 +152,19 @@ export default function LoginPage() {
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Enter Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register('password')}
                 className="w-full h-11 px-4 pr-11 rounded-lg text-sm outline-none transition-all duration-200"
                 style={{
                   backgroundColor: 'var(--bg-elevated)',
-                  border: '1px solid var(--border-primary)',
+                  border: `1px solid ${errors.password ? 'var(--color-danger)' : 'var(--border-primary)'}`,
                   color: 'var(--text-primary)',
                 }}
                 onFocus={(e) => {
-                  e.target.style.borderColor = 'var(--accent-primary)';
+                  e.target.style.borderColor = errors.password ? 'var(--color-danger)' : 'var(--accent-primary)';
                   e.target.style.boxShadow = '0 0 0 3px var(--accent-glow)';
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = 'var(--border-primary)';
+                  e.target.style.borderColor = errors.password ? 'var(--color-danger)' : 'var(--border-primary)';
                   e.target.style.boxShadow = 'none';
                 }}
               />
@@ -158,74 +178,34 @@ export default function LoginPage() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-xs mt-1.5" style={{ color: 'var(--color-danger)' }}>
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
-          {/* Remember me & Forgot password */}
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div
-                className="w-4 h-4 rounded flex items-center justify-center transition-all duration-200 peer-checked:border-transparent"
-                style={{
-                  backgroundColor: rememberMe ? 'var(--accent-primary)' : 'transparent',
-                  border: rememberMe ? 'none' : '1.5px solid var(--border-secondary)',
-                }}
-              >
-                {rememberMe && (
-                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path
-                      d="M1 4L3.5 6.5L9 1"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-              </div>
-              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                Remember me
-              </span>
-            </label>
-            <Link
-              to="/forgot-password"
-              className="text-sm font-medium no-underline transition-colors duration-200"
-              style={{ color: 'var(--accent-primary)' }}
-              onMouseOver={(e) => (e.target.style.color = 'var(--accent-light)')}
-              onMouseOut={(e) => (e.target.style.color = 'var(--accent-primary)')}
-            >
-              Forgot password?
-            </Link>
-          </div>
-
-          {/* Sign In Button */}
           <button
             type="submit"
-            className="w-full h-11 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200"
+            className="w-full h-11 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 mt-2"
             style={{
               backgroundColor: 'var(--accent-primary)',
               color: 'var(--text-on-accent)',
               border: 'none',
             }}
             onMouseOver={(e) => {
-              e.target.style.backgroundColor = 'var(--accent-hover)';
-              e.target.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.4)';
+              e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
+              e.currentTarget.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.4)';
             }}
             onMouseOut={(e) => {
-              e.target.style.backgroundColor = 'var(--accent-primary)';
-              e.target.style.boxShadow = 'none';
+              e.currentTarget.style.backgroundColor = 'var(--accent-primary)';
+              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             Sign In
           </button>
         </form>
 
-        {/* Sign up link */}
         <p className="text-center text-sm mt-6" style={{ color: 'var(--text-secondary)' }}>
           Don't have an account?{' '}
           <Link

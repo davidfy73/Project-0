@@ -6,7 +6,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Top Welcome Bar */}
       <div
         className="flex items-center justify-between pb-3 border-b"
         style={{ borderColor: 'var(--border-primary)' }}

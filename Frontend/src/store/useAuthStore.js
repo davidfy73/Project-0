@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export const useAuthStore = create((set) => ({
-  isAuthenticated: true, // Default true agar dashboard langsung dapat ditinjau
+  isAuthenticated: true,
   user: {
     username: 'SecurityAnalyst',
     email: 'analyst@phishyearn.local',

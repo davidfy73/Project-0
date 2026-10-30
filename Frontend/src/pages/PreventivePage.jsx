@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ShieldCheck,
   KeyRound,
@@ -8,11 +10,12 @@ import {
   UserCheck,
   RefreshCw,
   ArrowRight,
+  Check,
 } from 'lucide-react';
 
 const PREVENTIVE_LIST = [
   {
-    id: 'strong-password',
+    id: 'use-strong-password',
     title: 'Use Strong Password',
     desc: 'Gunakan password kuat dan unik, password manager, serta aktifkan MFA.',
     icon: KeyRound,
@@ -24,7 +27,7 @@ const PREVENTIVE_LIST = [
     icon: Link2,
   },
   {
-    id: 'antivirus',
+    id: 'use-antivirus',
     title: 'Use Antivirus',
     desc: 'Gunakan antivirus yang aktif dan terbaru untuk mendeteksi serta mencegah malware.',
     icon: Shield,
@@ -56,6 +59,18 @@ const PREVENTIVE_LIST = [
 ];
 
 export default function PreventivePage() {
+  const navigate = useNavigate();
+  const [completedMap, setCompletedMap] = useState({});
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('preventive_completed') || '{}');
+      setCompletedMap(saved);
+    } catch {
+      setCompletedMap({});
+    }
+  }, []);
+
   return (
     <div className="space-y-6 animate-in fade-in">
       <div className="border-b pb-4" style={{ borderColor: 'var(--border-primary)' }}>
@@ -70,9 +85,12 @@ export default function PreventivePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {PREVENTIVE_LIST.map((item, idx) => {
           const Icon = item.icon;
+          const isDone = !!completedMap[item.id];
+
           return (
             <div
               key={item.id}
+              onClick={() => navigate(`/preventive/${item.id}`)}
               className="rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 cursor-pointer"
               style={{
                 backgroundColor: 'var(--bg-card)',
@@ -92,16 +110,32 @@ export default function PreventivePage() {
                   >
                     <Icon size={20} />
                   </div>
-                  <span
-                    className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full"
-                    style={{
-                      backgroundColor: 'var(--bg-elevated)',
-                      color: 'var(--text-secondary)',
-                      border: '1px solid var(--border-secondary)',
-                    }}
-                  >
-                    Topik 0{idx + 1}
-                  </span>
+
+                  <div className="flex items-center gap-1.5">
+                    {isDone && (
+                      <span
+                        title="Topic Selesai"
+                        className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                        style={{
+                          backgroundColor: 'rgba(32, 201, 151, 0.18)',
+                          color: 'var(--color-success)',
+                          border: '1px solid rgba(32, 201, 151, 0.35)',
+                        }}
+                      >
+                        <Check size={12} />
+                      </span>
+                    )}
+                    <span
+                      className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: 'var(--bg-elevated)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border-secondary)',
+                      }}
+                    >
+                      Topic 0{idx + 1}
+                    </span>
+                  </div>
                 </div>
                 <h3 className="text-base font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                   {item.title}

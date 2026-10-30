@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { BookOpen, ShieldAlert, Bug, Lock, Network, Users, MousePointerClick, ArrowRight } from 'lucide-react';
 
 const MODULES = [
@@ -46,6 +47,8 @@ const MODULES = [
 ];
 
 export default function ModulesPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6 animate-in fade-in">
       <div className="border-b pb-4" style={{ borderColor: 'var(--border-primary)' }}>
@@ -63,6 +66,7 @@ export default function ModulesPage() {
           return (
             <div
               key={item.id}
+              onClick={() => navigate(`/module/${item.id}/1`)}
               className="rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 cursor-pointer"
               style={{
                 backgroundColor: 'var(--bg-card)',
