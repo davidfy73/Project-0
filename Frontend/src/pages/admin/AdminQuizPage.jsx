@@ -537,7 +537,7 @@ export default function AdminQuizPage() {
             </div>
 
             <p className="text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-              Apakah Anda yakin ingin menghapus soal ini dari bank soal? Soal yang dihapus tidak akan lagi muncul dalam sesi kuis acak siswa.
+              Apakah Anda yakin ingin menghapus soal ini dari bank soal? Soal yang dihapus tidak akan lagi muncul dalam sesi kuis acak user.
             </p>
 
             <div className="pt-2 flex items-center justify-end gap-3">

@@ -27,8 +27,8 @@ export const INITIAL_USERS = [
   },
   {
     id: 'usr-2',
-    username: 'siswa_demo1',
-    role: 'siswa',
+    username: 'user_demo1',
+    role: 'user',
     registeredAt: '2026-09-15 14:20',
     lastActive: '2026-10-30 16:15',
     progress: {
@@ -44,8 +44,8 @@ export const INITIAL_USERS = [
   },
   {
     id: 'usr-3',
-    username: 'siswa_demo2',
-    role: 'siswa',
+    username: 'user_demo2',
+    role: 'user',
     registeredAt: '2026-10-10 11:05',
     lastActive: '2026-10-28 20:45',
     progress: {
@@ -91,7 +91,7 @@ export const INITIAL_QUESTIONS = [
       '3 hard disk, 2 kabel data, 1 password',
       '3 salinan data, 2 jenis media berbeda, 1 salinan di lokasi terpisah',
       '3 kali backup per hari, 2 kali per minggu, 1 kali per bulan',
-      '3 user admin, 2 akun siswa, 1 server utama',
+      '3 user admin, 2 akun user, 1 server utama',
     ],
     correctIndex: 1,
     explanation: 'Strategi 3-2-1 berarti menyimpan 3 salinan data, pada 2 media penyimpanan berbeda, dengan 1 salinan berada di luar lokasi utama (off-site/cloud).',

@@ -125,7 +125,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
                 className="text-[10px] leading-tight"
                 style={{ color: 'var(--text-secondary)' }}
               >
-                {user?.role || 'Learner'}
+                {user?.role || 'user'}
               </span>
             </div>
           </button>
@@ -140,7 +140,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
                 boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
               }}
             >
-              {/* Header: Nama user & Email */}
+              {/* Header: Nama user */}
               <div
                 className="pb-3 border-b"
                 style={{ borderColor: 'var(--border-primary)' }}
@@ -158,9 +158,6 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
                   <div className="overflow-hidden">
                     <p className="text-xs sm:text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>
                       {user?.username || 'User'}
-                    </p>
-                    <p className="text-[11px] truncate" style={{ color: 'var(--text-muted)' }}>
-                      {user?.email || 'user@phishyearn.local'}
                     </p>
                   </div>
                 </div>
@@ -183,7 +180,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
                       border: '1px solid var(--border-primary)',
                     }}
                   >
-                    {user?.role || 'Trainee'}
+                    {user?.role || 'user'}
                   </span>
                 </div>
 

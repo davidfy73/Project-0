@@ -65,14 +65,14 @@ function App() {
       />
 
       <Routes>
-        {/* Public auth routes (siswa) */}
+        {/* Public auth routes (user) */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
         {/* Admin Login */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
 
-        {/* Siswa Protected Routes */}
+        {/* User Protected Routes */}
         <Route
           element={
             <ProtectedRoute>

@@ -29,9 +29,9 @@ Tujuan: lingkungan siap sebelum AI menyentuh backend.
 
 - [x] `.gitignore` melindungi `.env` dan `node_modules`
 - [x] Library backend terpasang, `type: module`
-- [ ] Database MongoDB Atlas dibuat, connection string disalin
-- [ ] `Backend/.env` terisi (database, dua secret token, akun admin dari env)
-- [ ] `Backend/.env.example` sesuai (nama variabel saja, tanpa nilai)
+- [x] Database MongoDB lokal (Docker, container phishyearn-server) jalan
+- [x] `Backend/.env` terisi (database, dua secret token, akun admin dari env)
+- [x] `Backend/.env.example` sesuai (nama variabel saja, tanpa nilai)
 
 Selesai jika: `.env` terisi dan tidak muncul di `git status`.
 
@@ -39,10 +39,10 @@ Selesai jika: `.env` terisi dan tidak muncul di `git status`.
 
 Tujuan: frontend bersih dari sisa keputusan lama sebelum disambungkan.
 
-- [ ] Hapus semua referensi email
-- [ ] Samakan istilah role jadi `user` dan `admin` (hapus "Trainee" dan "siswa")
-- [ ] Rapikan halaman admin Quiz (jumlah soal bebas, tanpa saran minimal)
-- [ ] Catat daftar slug resmi 6 Module dan 7 Preventive
+- [x] Hapus semua referensi email
+- [x] Samakan istilah role jadi `user` dan `admin` (hapus "Trainee" dan "siswa")
+- [x] Rapikan halaman admin Quiz (jumlah soal bebas, tanpa saran minimal)
+- [x] Catat daftar slug resmi 6 Module dan 7 Preventive
 
 Selesai jika: pencarian "email", "siswa", dan "Trainee" di `Frontend/src` kosong, aplikasi tetap jalan.
 

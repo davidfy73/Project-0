@@ -139,7 +139,7 @@ export default function PreventiveOverview() {
             Cybersecurity Quiz
           </h3>
           <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-secondary)' }}>
-            Uji pemahaman Anda dengan 15 soal pilihan ganda acak dari bank soal materi Module dan
+            Uji pemahaman Anda dengan soal pilihan ganda acak dari bank soal materi Module dan
             Preventive.
           </p>
 
@@ -152,11 +152,11 @@ export default function PreventiveOverview() {
           >
             <div className="flex justify-between" style={{ color: 'var(--text-muted)' }}>
               <span>Bank Soal:</span>
-              <span className="font-mono" style={{ color: 'var(--text-primary)' }}>30-40 Pertanyaan</span>
+              <span className="font-mono" style={{ color: 'var(--text-primary)' }}>Tersedia</span>
             </div>
             <div className="flex justify-between" style={{ color: 'var(--text-muted)' }}>
               <span>Format:</span>
-              <span className="font-mono" style={{ color: 'var(--text-primary)' }}>15 Soal Acak</span>
+              <span className="font-mono" style={{ color: 'var(--text-primary)' }}>Pilihan Ganda</span>
             </div>
           </div>
         </div>
