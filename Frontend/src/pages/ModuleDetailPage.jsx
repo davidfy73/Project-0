@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
-import { ArrowLeft, Check, Sparkles, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Check, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { getNavigation } from '../data/modulesData';
+import { useProgressStore } from '../store/useProgressStore';
 
 export default function ModuleDetailPage() {
   const { slug, section } = useParams();
@@ -11,22 +13,11 @@ export default function ModuleDetailPage() {
   const currentSectionId = section || '1';
   const navInfo = getNavigation(slug, currentSectionId);
 
-  const [isCompleted, setIsCompleted] = useState(false);
-
-  useEffect(() => {
-    if (slug && currentSectionId) {
-      try {
-        const saved = JSON.parse(localStorage.getItem('completed_sections') || '{}');
-        setIsCompleted(!!saved[`${slug}-${currentSectionId}`]);
-      } catch {
-        setIsCompleted(false);
-      }
-    }
-  }, [slug, currentSectionId]);
+  const { module: completedModules, completeMaterial, isCompleting } = useProgressStore();
+  const isCompleted = completedModules.includes(slug);
 
   // Setiap kali berganti halaman/section/modul, scroll kembali ke atas
   useEffect(() => {
-    // Karena layout AppLayout menggunakan element <main> dengan overflow-y-auto
     const mainEl = document.querySelector('main');
     if (mainEl) {
       mainEl.scrollTo({ top: 0, behavior: 'instant' });
@@ -81,21 +72,14 @@ export default function ModuleDetailPage() {
     }
   };
 
-  // Handler tombol Mark Complete & Next
-  const handleMarkCompleteAndNext = () => {
-    // Simpan status selesai ke localStorage
-    try {
-      const saved = JSON.parse(localStorage.getItem('completed_sections') || '{}');
-      saved[`${module.id}-${currentSectionNum}`] = true;
-      localStorage.setItem('completed_sections', JSON.stringify(saved));
-      setIsCompleted(true);
-    } catch (e) {
-      console.error('Failed to save completion to localStorage', e);
-    }
-
-    // Pindah ke section berikutnya
-    if (next) {
-      navigate(next.path);
+  // Handler tombol Tandai Selesai
+  const handleMarkComplete = async () => {
+    if (isCompleted || isCompleting) return;
+    const res = await completeMaterial(slug);
+    if (res.success) {
+      toast.success(`Modul "${module.title}" berhasil ditandai selesai!`);
+    } else {
+      toast.error(res.message);
     }
   };
 
@@ -113,16 +97,31 @@ export default function ModuleDetailPage() {
           <ArrowLeft size={14} />
           <span>Kembali ke Modules</span>
         </Link>
-        <span
-          className="text-[11px] font-mono font-medium px-2.5 py-0.5 rounded-full"
-          style={{
-            backgroundColor: 'var(--bg-elevated)',
-            color: 'var(--accent-light)',
-            border: '1px solid var(--border-secondary)',
-          }}
-        >
-          {module.title}
-        </span>
+        <div className="flex items-center gap-2">
+          {isCompleted && (
+            <span
+              className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
+              style={{
+                backgroundColor: 'rgba(32, 201, 151, 0.15)',
+                color: 'var(--color-success)',
+                border: '1px solid rgba(32, 201, 151, 0.3)',
+              }}
+            >
+              <Check size={12} />
+              <span>Selesai</span>
+            </span>
+          )}
+          <span
+            className="text-[11px] font-mono font-medium px-2.5 py-0.5 rounded-full"
+            style={{
+              backgroundColor: 'var(--bg-elevated)',
+              color: 'var(--accent-light)',
+              border: '1px solid var(--border-secondary)',
+            }}
+          >
+            {module.title}
+          </span>
+        </div>
       </div>
 
       {/* Bagian Atas: Monospace Section N / total, Judul Section Besar, Garis Pemisah */}
@@ -136,7 +135,7 @@ export default function ModuleDetailPage() {
         <div className="border-b" style={{ borderColor: 'var(--border-primary)' }} />
       </div>
 
-      {/* Isi Konten Materi: Paragraf, Subjudul, Daftar Poin, Inline Code Highlight Biru */}
+      {/* Isi Konten Materi */}
       <div className="leading-relaxed">
         <ReactMarkdown
           components={{
@@ -151,7 +150,7 @@ export default function ModuleDetailPage() {
               </h2>
             ),
             h3: ({ children }) => (
-              <h3 className="text-lg sm:text-xl font-bold mt-6 mb-2 tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              <h3 className="text-base sm:text-lg font-bold mt-6 mb-2 tracking-tight" style={{ color: 'var(--text-primary)' }}>
                 {children}
               </h3>
             ),
@@ -161,72 +160,77 @@ export default function ModuleDetailPage() {
               </p>
             ),
             ul: ({ children }) => (
-              <ul className="list-disc pl-6 mb-5 space-y-2 text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>
+              <ul className="list-disc pl-5 mb-4 space-y-1.5 text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>
                 {children}
               </ul>
             ),
             ol: ({ children }) => (
-              <ol className="list-decimal pl-6 mb-5 space-y-2 text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>
+              <ol className="list-decimal pl-5 mb-4 space-y-1.5 text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>
                 {children}
               </ol>
             ),
-            li: ({ children }) => <li className="leading-relaxed pl-1">{children}</li>,
-            code: ({ inline, className, children, ...props }) => {
-              return (
-                <code
-                  className="font-mono text-xs sm:text-[13px] px-1.5 py-0.5 rounded font-medium inline-block my-0.5"
-                  style={{
-                    backgroundColor: '#16263d',
-                    color: '#60A5FA',
-                    border: '1px solid rgba(96, 165, 250, 0.25)',
-                  }}
-                  {...props}
-                >
-                  {children}
-                </code>
-              );
-            },
-            strong: ({ children }) => (
-              <strong className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                {children}
-              </strong>
-            ),
+            li: ({ children }) => <li className="leading-relaxed">{children}</li>,
             blockquote: ({ children }) => (
               <blockquote
-                className="border-l-4 pl-4 py-2 my-4 rounded-r text-sm"
+                className="border-l-4 pl-4 py-2 my-4 rounded-r-lg text-sm sm:text-base italic"
                 style={{
-                  borderColor: 'var(--accent-primary)',
                   backgroundColor: 'var(--bg-elevated)',
+                  borderColor: 'var(--accent-primary)',
                   color: 'var(--text-secondary)',
                 }}
               >
                 {children}
               </blockquote>
             ),
+            code: ({ inline, children, ...props }) => {
+              if (inline || typeof children === 'string') {
+                return (
+                  <code
+                    className="font-mono text-xs sm:text-[13px] px-1.5 py-0.5 rounded font-medium"
+                    style={{
+                      backgroundColor: 'var(--accent-deep)',
+                      color: 'var(--accent-light)',
+                      border: '1px solid rgba(59, 130, 246, 0.25)',
+                    }}
+                    {...props}
+                  >
+                    {children}
+                  </code>
+                );
+              }
+              return (
+                <pre
+                  className="p-4 rounded-xl overflow-x-auto text-xs sm:text-sm font-mono my-4 border"
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    borderColor: 'var(--border-primary)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  <code>{children}</code>
+                </pre>
+              );
+            },
           }}
         >
           {currentSection.content}
         </ReactMarkdown>
       </div>
 
-      {/* Bagian Bawah: Garis pemisah, Previous di kiri, Section N / total di tengah, Next & Mark Complete di kanan */}
+      {/* Bagian Bawah: Navigasi Antar Section & Tandai Selesai */}
       <div
         className="mt-12 pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4"
         style={{ borderColor: 'var(--border-primary)' }}
       >
-        {/* Tombol Previous di Kiri */}
+        {/* Tombol Previous */}
         <button
           type="button"
           onClick={handlePrevious}
-          disabled={isFirst}
-          className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
-            isFirst
-              ? 'opacity-30 cursor-not-allowed'
-              : 'cursor-pointer hover:border-blue-500'
-          }`}
+          disabled={isFirst || !prev}
+          className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           style={{
-            backgroundColor: 'var(--bg-card)',
-            color: isFirst ? 'var(--text-muted)' : 'var(--text-primary)',
+            backgroundColor: 'var(--bg-elevated)',
+            color: 'var(--text-secondary)',
             border: '1px solid var(--border-primary)',
           }}
         >
@@ -241,7 +245,7 @@ export default function ModuleDetailPage() {
 
         {/* Tombol Navigasi di Kanan */}
         <div className="w-full sm:w-auto flex items-center justify-end gap-2.5">
-          {/* Badge +10 XP (bergaya HTB Academy) */}
+          {/* Badge +10 XP */}
           <div
             className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl font-mono text-xs font-semibold"
             style={{
@@ -271,25 +275,38 @@ export default function ModuleDetailPage() {
               Next
             </button>
           ) : (
-            /* Tombol Mark Complete HANYA di section 3 / 3 */
+            /* Tombol Tandai Selesai di section terakhir */
             <button
               type="button"
-              onClick={handleMarkCompleteAndNext}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-sm"
+              disabled={isCompleted || isCompleting}
+              onClick={handleMarkComplete}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm disabled:cursor-not-allowed"
               style={{
                 backgroundColor: isCompleted ? 'rgba(32, 201, 151, 0.18)' : 'var(--accent-primary)',
                 color: isCompleted ? 'var(--color-success)' : 'var(--text-on-accent)',
                 border: isCompleted ? '1px solid rgba(32, 201, 151, 0.4)' : '1px solid var(--accent-primary)',
+                opacity: isCompleting ? 0.6 : 1,
               }}
               onMouseOver={(e) => {
-                if (!isCompleted) e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
+                if (!isCompleted && !isCompleting) e.currentTarget.style.backgroundColor = 'var(--accent-hover)';
               }}
               onMouseOut={(e) => {
-                if (!isCompleted) e.currentTarget.style.backgroundColor = 'var(--accent-primary)';
+                if (!isCompleted && !isCompleting) e.currentTarget.style.backgroundColor = 'var(--accent-primary)';
               }}
             >
-              {isCompleted && <Check size={15} />}
-              <span>{isCompleted ? 'Completed ✓' : (isLast ? 'Mark as Complete' : 'Mark Complete & Next')}</span>
+              {isCompleting ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" />
+                  <span>Menyimpan...</span>
+                </>
+              ) : isCompleted ? (
+                <>
+                  <Check size={15} />
+                  <span>Selesai ✓</span>
+                </>
+              ) : (
+                <span>Tandai Selesai</span>
+              )}
             </button>
           )}
         </div>

@@ -15,8 +15,8 @@ Aturan tetap: role hanya `user` dan `admin`, tanpa email, rahasia hanya di `Back
 ## Gambaran Alur
 
 ```
-[x] Persiapan -> [x] Rapikan frontend -> [x] Backend dasar -> [x] Auth -> [ ] Quiz
--> [ ] Progress -> [ ] Admin (User + Progress) -> [ ] Scan VirusTotal -> [ ] Deploy
+[x] Persiapan -> [x] Rapikan frontend -> [x] Backend dasar -> [x] Auth -> [x] Quiz
+-> [x] Progress -> [ ] Admin (User + Progress) -> [ ] Scan VirusTotal -> [ ] Deploy
 ```
 
 Urutan ini sengaja: Auth dulu karena semua fitur lain butuh login; Quiz sebelum Admin lainnya karena soal harus bisa dibuat admin sebelum kuis user bisa diuji; Scan terakhir karena paling rumit (batas API, upload file).
@@ -74,17 +74,17 @@ Cara sesi bekerja: access token singkat dikirim lewat header, refresh token di c
 
 Selesai jika: daftar, login, refresh halaman tetap login, logout, login admin berhasil, dan user biasa ditolak di area admin (403).
 
-## Langkah 4: Quiz (termasuk soal dari admin) [BERIKUTNYA]
+## Langkah 4: Quiz (termasuk soal dari admin)
 
 Tujuan: admin membuat sendiri soal dan jawaban; user mengerjakan kuis dari soal itu.
 
 Yang dibuat:
 
-- [ ] Model Question (kategori, pertanyaan, 4 pilihan, jawaban benar, penjelasan) dan QuizResult (skor, total soal, waktu)
-- [ ] Sisi admin: tambah, edit, hapus, dan lihat soal
-- [ ] Sisi user: ambil semua soal dengan urutan acak (jawaban benar tidak dikirim), kirim jawaban, penilaian dilakukan di backend, hasil disimpan
-- [ ] Tanpa seed soal dan tanpa angka tetap; jumlah soal bebas
-- [ ] Sambungkan frontend: halaman admin Quiz (CRUD soal) dan halaman Quiz user (bangun ulang agar memuat semua soal dari backend dan menampilkan skor benar/total)
+- [x] Model Question (kategori, pertanyaan, 4 pilihan, jawaban benar, penjelasan) dan QuizResult (skor, total soal, waktu)
+- [x] Sisi admin: tambah, edit, hapus, dan lihat soal
+- [x] Sisi user: ambil semua soal dengan urutan acak (jawaban benar tidak dikirim), kirim jawaban, penilaian dilakukan di backend, hasil disimpan
+- [x] Tanpa seed soal dan tanpa angka tetap; jumlah soal bebas
+- [x] Sambungkan frontend: halaman admin Quiz (CRUD soal) dan halaman Quiz user (bangun ulang agar memuat semua soal dari backend dan menampilkan skor benar/total)
 
 Selesai jika: admin membuat beberapa soal, user menyelesaikan satu sesi penuh, skor tersimpan, dan bank kosong menampilkan "Belum ada soal kuis".
 
@@ -94,14 +94,14 @@ Tujuan: sistem tahu materi mana yang sudah dibaca tiap user.
 
 Yang dibuat:
 
-- [ ] Model Progress: user dan daftar slug materi yang selesai
-- [ ] Catat materi selesai dan baca progres sendiri
-- [ ] Backend hanya menerima slug yang sah (6 Module dan 7 Preventive); isi materi tetap file di Frontend
-- [ ] Sambungkan frontend: tombol/penanda selesai di halaman Module dan Preventive, serta ringkasan progres di popover profil Navbar
+- [x] Model Progress: user dan daftar slug materi yang selesai
+- [x] Catat materi selesai dan baca progres sendiri
+- [x] Backend hanya menerima slug yang sah (6 Module dan 7 Preventive); isi materi tetap file di Frontend
+- [x] Sambungkan frontend: tombol/penanda selesai di halaman Module dan Preventive, serta ringkasan progres di popover profil Navbar
 
 Selesai jika: membaca materi menambah angka progres (misal 3/6) dan angka bertahan setelah logout dan login lagi.
 
-## Langkah 6: Admin (User dan Progress)
+## Langkah 6: Admin (User dan Progress) [BERIKUTNYA]
 
 Tujuan: admin bisa melihat, memantau, dan menghapus user.
 
@@ -147,7 +147,7 @@ Selesai jika: kamu bisa mendaftar, login, mengerjakan kuis, dan login admin dari
 
 - [x] `v0.1.0` frontend selesai dengan data mock
 - [x] `v0.2.0` auth tersambung
-- [ ] `v0.3.0` quiz tersambung
+- [x] `v0.3.0` quiz tersambung
 - [ ] `v0.4.0` progress dan admin tersambung
 - [ ] `v0.5.0` scan tersambung
 - [ ] `v1.0.0` siap deploy

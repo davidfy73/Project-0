@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, ShieldAlert, Bug, Lock, Network, Users, MousePointerClick, ArrowRight } from 'lucide-react';
+import { useProgressStore } from '../store/useProgressStore.js';
+import { BookOpen, ShieldAlert, Bug, Lock, Network, Users, MousePointerClick, ArrowRight, Check } from 'lucide-react';
 
 const MODULES = [
   {
@@ -48,6 +49,7 @@ const MODULES = [
 
 export default function ModulesPage() {
   const navigate = useNavigate();
+  const completedModules = useProgressStore((state) => state.module);
 
   return (
     <div className="space-y-6 animate-in fade-in">
@@ -63,6 +65,7 @@ export default function ModulesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {MODULES.map((item) => {
           const Icon = item.icon;
+          const isDone = completedModules.includes(item.id);
           return (
             <div
               key={item.id}
@@ -86,16 +89,31 @@ export default function ModulesPage() {
                   >
                     <Icon size={20} />
                   </div>
-                  <span
-                    className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full"
-                    style={{
-                      backgroundColor: 'var(--bg-elevated)',
-                      color: 'var(--text-secondary)',
-                      border: '1px solid var(--border-secondary)',
-                    }}
-                  >
-                    {item.tag}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {isDone && (
+                      <span
+                        title="Modul Selesai"
+                        className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                        style={{
+                          backgroundColor: 'rgba(32, 201, 151, 0.18)',
+                          color: 'var(--color-success)',
+                          border: '1px solid rgba(32, 201, 151, 0.35)',
+                        }}
+                      >
+                        <Check size={12} />
+                      </span>
+                    )}
+                    <span
+                      className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: 'var(--bg-elevated)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border-secondary)',
+                      }}
+                    >
+                      {item.tag}
+                    </span>
+                  </div>
                 </div>
                 <h3 className="text-base font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                   {item.title}

@@ -5,6 +5,7 @@
 
 import { create } from 'zustand';
 import api from '../lib/api.js';
+import { useProgressStore } from './useProgressStore.js';
 
 export const useAuthStore = create((set, get) => ({
   // null = belum diketahui (belum cek /me), false = belum login, object = data user
@@ -29,22 +30,20 @@ export const useAuthStore = create((set, get) => ({
         id: userData.id,
         username: userData.username,
         role: userData.role,
-        // Progress akan diisi saat Langkah 5 (Progress) selesai;
-        // sementara diisi 0 agar Navbar tidak error
-        progress: {
-          modulesRead: 0,
-          totalModules: 6,
-          preventiveRead: 0,
-          totalPreventive: 7,
-        },
       },
     });
+
+    // Muat progres belajar hanya jika role adalah 'user'
+    if (userData.role === 'user') {
+      useProgressStore.getState().fetchProgress();
+    }
   },
 
   // Dipanggil saat logout atau refresh gagal
   clearAuth: () => {
     delete api.defaults.headers.common['Authorization'];
     set({ isAuthenticated: false, accessToken: null, user: null });
+    useProgressStore.getState().reset();
   },
 
   // Logout: panggil backend lalu bersihkan state
@@ -77,17 +76,17 @@ export const useAuthStore = create((set, get) => ({
           id: userData.id,
           username: userData.username,
           role: userData.role,
-          progress: {
-            modulesRead: 0,
-            totalModules: 6,
-            preventiveRead: 0,
-            totalPreventive: 7,
-          },
         },
       });
+
+      // Muat progres belajar hanya jika role adalah 'user'
+      if (userData.role === 'user') {
+        useProgressStore.getState().fetchProgress();
+      }
     } catch {
-      // Cookie tidak ada atau sudah expired → tetap belum login
+      // Cookie tidak ada atau sudah expired → tetap belum login & reset progres
       set({ isAuthenticated: false, accessToken: null, user: null });
+      useProgressStore.getState().reset();
     }
   },
 }));

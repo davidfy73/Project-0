@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, LogOut, Menu, X, BookOpen, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useProgressStore } from '../../store/useProgressStore';
 
 export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
   const { user, logout } = useAuthStore();
@@ -35,13 +36,10 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
     navigate('/login');
   };
 
-  const modulesRead = user?.progress?.modulesRead ?? 4;
-  const totalModules = user?.progress?.totalModules ?? 6;
-  const preventiveRead = user?.progress?.preventiveRead ?? 5;
-  const totalPreventive = user?.progress?.totalPreventive ?? 7;
+  const { moduleCount, moduleTotal, preventiveCount, preventiveTotal } = useProgressStore();
 
-  const modulePercent = Math.round((modulesRead / totalModules) * 100);
-  const preventivePercent = Math.round((preventiveRead / totalPreventive) * 100);
+  const modulePercent = moduleTotal > 0 ? Math.round((moduleCount / moduleTotal) * 100) : 0;
+  const preventivePercent = preventiveTotal > 0 ? Math.round((preventiveCount / preventiveTotal) * 100) : 0;
 
   return (
     <header
@@ -192,7 +190,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
                       <span>Module</span>
                     </span>
                     <span className="font-mono text-[11px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      {modulesRead}/{totalModules}
+                      {moduleCount}/{moduleTotal}
                     </span>
                   </div>
                   <div
@@ -217,7 +215,7 @@ export default function Navbar({ onToggleSidebar, isSidebarOpen }) {
                       <span>Preventive</span>
                     </span>
                     <span className="font-mono text-[11px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      {preventiveRead}/{totalPreventive}
+                      {preventiveCount}/{preventiveTotal}
                     </span>
                   </div>
                   <div

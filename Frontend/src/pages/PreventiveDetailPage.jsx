@@ -1,13 +1,19 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Navigate, Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useParams, useNavigate, Link, Navigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import {
   ArrowLeft,
   Check,
-  AlertTriangle,
+  ShieldCheck,
+  CheckCircle2,
+  XCircle,
   Lightbulb,
+  ExternalLink,
+  Loader2,
 } from 'lucide-react';
-import { getPreventiveNavigation } from '../data/preventiveData';
+import toast from 'react-hot-toast';
+import { getPreventiveBySlug, getPreventiveNavigation } from '../data/preventiveData';
+import { useProgressStore } from '../store/useProgressStore';
 
 export default function PreventiveDetailPage() {
   const { slug } = useParams();
@@ -15,23 +21,14 @@ export default function PreventiveDetailPage() {
 
   const navInfo = getPreventiveNavigation(slug);
 
-  // Jika slug tidak valid, redirect ke halaman /preventive
   if (!navInfo) {
     return <Navigate to="/preventive" replace />;
   }
 
   const { topic, currentIndex, totalTopics, isFirst, isLast, prevTopic, nextTopic } = navInfo;
-  const [isCompleted, setIsCompleted] = useState(false);
 
-  // Cek status selesai dari localStorage
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('preventive_completed') || '{}');
-      setIsCompleted(!!saved[topic.slug]);
-    } catch {
-      setIsCompleted(false);
-    }
-  }, [topic.slug]);
+  const { preventive: completedPreventive, completeMaterial, isCompleting } = useProgressStore();
+  const isCompleted = completedPreventive.includes(topic.slug);
 
   // Scroll ke atas setiap kali slug berubah
   useEffect(() => {
@@ -55,20 +52,13 @@ export default function PreventiveDetailPage() {
     }
   };
 
-  const handleMarkCompleteAndNext = () => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('preventive_completed') || '{}');
-      saved[topic.slug] = true;
-      localStorage.setItem('preventive_completed', JSON.stringify(saved));
-      setIsCompleted(true);
-    } catch (err) {
-      console.error('Failed to save preventive completion', err);
-    }
-
-    if (isLast) {
-      navigate('/preventive');
-    } else if (nextTopic) {
-      navigate(`/preventive/${nextTopic.slug}`);
+  const handleMarkComplete = async () => {
+    if (isCompleted || isCompleting) return;
+    const res = await completeMaterial(topic.slug);
+    if (res.success) {
+      toast.success(`Topik "${topic.title}" berhasil ditandai selesai!`);
+    } else {
+      toast.error(res.message);
     }
   };
 
@@ -110,7 +100,7 @@ export default function PreventiveDetailPage() {
         <div className="flex items-center gap-2">
           {isCompleted && (
             <span
-              className="flex items-center gap-1 text-[11px] font-mono font-medium px-2 py-0.5 rounded-full"
+              className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
               style={{
                 backgroundColor: 'rgba(32, 201, 151, 0.15)',
                 color: 'var(--color-success)',
@@ -134,115 +124,139 @@ export default function PreventiveDetailPage() {
         </div>
       </div>
 
-      {/* Header Halaman: Teks monospace Topik N / 7, Judul Topik Besar, Garis Pemisah */}
+      {/* Header Materi */}
       <div className="mb-6">
-        <div className="font-mono text-xs sm:text-sm tracking-wider" style={{ color: 'var(--text-muted)' }}>
-          Topic {currentIndex + 1} / {totalTopics}
+        <div className="flex items-center gap-2 text-xs font-mono mb-1" style={{ color: 'var(--text-muted)' }}>
+          <ShieldCheck size={14} style={{ color: 'var(--color-success)' }} />
+          <span>Panduan Pencegahan Keamanan Siber</span>
         </div>
-        <h1
-          className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight mt-1 mb-5"
-          style={{ color: 'var(--text-primary)' }}
-        >
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight mt-1 mb-5" style={{ color: 'var(--text-primary)' }}>
           {topic.title}
         </h1>
         <div className="border-b" style={{ borderColor: 'var(--border-primary)' }} />
       </div>
 
-      {/* Konten Halaman Lengkap (Semua blok materi dalam satu halaman penuh) */}
-      <div className="space-y-4">
+      {/* Konten Berdasarkan Tipe Blok */}
+      <div className="space-y-6">
         {topic.blocks.map((block, idx) => {
-          if (block.type === 'section') {
+          if (block.type === 'section-title') {
             return (
-              <div
+              <h2
                 key={idx}
-                className="pt-8 pb-2 mt-8 first:mt-0 first:pt-0 border-t first:border-t-0"
-                style={{ borderColor: 'var(--border-primary)' }}
-              >
-                <h2
-                  className="text-base sm:text-lg font-mono font-bold tracking-wider uppercase text-[var(--accent-light)]"
-                >
-                  {block.text}
-                </h2>
-              </div>
-            );
-          }
-
-          if (block.type === 'h3') {
-            return (
-              <h3
-                key={idx}
-                className="text-lg sm:text-xl font-bold mt-6 mb-2 tracking-tight"
+                className="text-lg sm:text-xl font-bold tracking-tight pt-4 first:pt-0"
                 style={{ color: 'var(--text-primary)' }}
               >
                 {block.text}
-              </h3>
+              </h2>
             );
           }
 
           if (block.type === 'paragraph') {
             return (
+              <p key={idx} className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                <ReactMarkdown components={markdownComponents}>{block.text}</ReactMarkdown>
+              </p>
+            );
+          }
+
+          if (block.type === 'checklist') {
+            return (
               <div
                 key={idx}
-                className="text-sm sm:text-base leading-relaxed text-[var(--text-secondary)]"
+                className="rounded-2xl p-5 border space-y-3"
+                style={{
+                  backgroundColor: 'var(--bg-card)',
+                  borderColor: 'var(--border-primary)',
+                }}
               >
-                <ReactMarkdown components={markdownComponents}>{block.text}</ReactMarkdown>
+                {block.label && (
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2" style={{ color: 'var(--color-success)' }}>
+                    <CheckCircle2 size={16} />
+                    <span>{block.label}</span>
+                  </h3>
+                )}
+                <ul className="space-y-2.5">
+                  {block.items.map((item, itemIdx) => (
+                    <li key={itemIdx} className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                      <Check size={15} className="shrink-0 mt-0.5" style={{ color: 'var(--color-success)' }} />
+                      <ReactMarkdown components={markdownComponents}>{item}</ReactMarkdown>
+                    </li>
+                  ))}
+                </ul>
               </div>
             );
           }
 
-          if (block.type === 'list') {
-            return (
-              <ul
-                key={idx}
-                className="list-disc pl-6 my-3 space-y-2 text-sm sm:text-base text-[var(--text-secondary)]"
-              >
-                {block.items.map((item, itemIdx) => (
-                  <li key={itemIdx} className="leading-relaxed pl-1">
-                    <ReactMarkdown components={markdownComponents}>{item}</ReactMarkdown>
-                  </li>
-                ))}
-              </ul>
-            );
-          }
-
           if (block.type === 'callout') {
-            const isWarning = block.variant === 'warning';
+            const isDanger = block.variant === 'danger';
             return (
               <div
                 key={idx}
-                className="p-4 my-5 rounded-r-xl border-l-4"
+                className="rounded-2xl p-4 sm:p-5 border flex items-start gap-3.5"
                 style={{
-                  borderLeftColor: isWarning ? 'var(--color-warning)' : 'var(--color-success)',
-                  backgroundColor: isWarning
-                    ? 'rgba(251, 191, 36, 0.08)'
-                    : 'rgba(32, 201, 151, 0.08)',
-                  borderTop: isWarning
-                    ? '1px solid rgba(251, 191, 36, 0.15)'
-                    : '1px solid rgba(32, 201, 151, 0.15)',
-                  borderRight: isWarning
-                    ? '1px solid rgba(251, 191, 36, 0.15)'
-                    : '1px solid rgba(32, 201, 151, 0.15)',
-                  borderBottom: isWarning
-                    ? '1px solid rgba(251, 191, 36, 0.15)'
-                    : '1px solid rgba(32, 201, 151, 0.15)',
+                  backgroundColor: isDanger ? 'rgba(255, 91, 100, 0.08)' : 'rgba(59, 130, 246, 0.08)',
+                  borderColor: isDanger ? 'rgba(255, 91, 100, 0.25)' : 'rgba(59, 130, 246, 0.25)',
                 }}
               >
-                <div className="flex items-start gap-3">
-                  {isWarning ? (
-                    <AlertTriangle size={18} className="shrink-0 mt-0.5 text-amber-400" />
-                  ) : (
-                    <Lightbulb size={18} className="shrink-0 mt-0.5 text-emerald-400" />
-                  )}
-                  <div className="text-xs sm:text-sm leading-relaxed text-[var(--text-primary)]">
-                    <span
-                      className={`font-bold mr-1.5 ${
-                        isWarning ? 'text-amber-400' : 'text-emerald-400'
-                      }`}
+                <div
+                  className="p-2 rounded-xl shrink-0"
+                  style={{
+                    backgroundColor: isDanger ? 'rgba(255, 91, 100, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                    color: isDanger ? 'var(--color-danger)' : 'var(--accent-primary)',
+                  }}
+                >
+                  {isDanger ? <XCircle size={18} /> : <Lightbulb size={18} />}
+                </div>
+                <div className="space-y-1">
+                  {block.label && (
+                    <h4
+                      className="text-xs sm:text-sm font-bold"
+                      style={{ color: isDanger ? 'var(--color-danger)' : 'var(--accent-light)' }}
                     >
                       {block.label}
-                    </span>
+                    </h4>
+                  )}
+                  <p className="text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                     <ReactMarkdown components={markdownComponents}>{block.text}</ReactMarkdown>
-                  </div>
+                  </p>
+                </div>
+              </div>
+            );
+          }
+
+          if (block.type === 'steps') {
+            return (
+              <div className="space-y-3">
+                {block.label && (
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+                    {block.label}
+                  </h3>
+                )}
+                <div className="space-y-3">
+                  {block.items.map((step, stepIdx) => (
+                    <div
+                      key={stepIdx}
+                      className="rounded-2xl p-4 border flex items-start gap-3.5"
+                      style={{
+                        backgroundColor: 'var(--bg-card)',
+                        borderColor: 'var(--border-primary)',
+                      }}
+                    >
+                      <span
+                        className="w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 mt-0.5"
+                        style={{
+                          backgroundColor: 'var(--accent-deep)',
+                          color: 'var(--accent-light)',
+                          border: '1px solid rgba(59, 130, 246, 0.3)',
+                        }}
+                      >
+                        {stepIdx + 1}
+                      </span>
+                      <div className="text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                        <ReactMarkdown components={markdownComponents}>{step}</ReactMarkdown>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             );
@@ -252,22 +266,20 @@ export default function PreventiveDetailPage() {
         })}
       </div>
 
-      {/* Bagian Bawah: Tombol Previous, Topik N / 7, Tombol Next, Tombol Hijau Mark Complete & Next */}
+      {/* Bottom Bar: Navigasi & Tandai Selesai */}
       <div
         className="mt-12 pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4"
         style={{ borderColor: 'var(--border-primary)' }}
       >
-        {/* Tombol Previous di Kiri */}
+        {/* Tombol Previous */}
         <button
           type="button"
           onClick={handlePrevious}
-          disabled={isFirst}
-          className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all ${
-            isFirst ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer hover:border-blue-500'
-          }`}
+          disabled={isFirst || !prevTopic}
+          className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
           style={{
-            backgroundColor: 'var(--bg-card)',
-            color: isFirst ? 'var(--text-muted)' : 'var(--text-primary)',
+            backgroundColor: 'var(--bg-elevated)',
+            color: 'var(--text-secondary)',
             border: '1px solid var(--border-primary)',
           }}
         >
@@ -275,14 +287,14 @@ export default function PreventiveDetailPage() {
           <span>Previous</span>
         </button>
 
-        {/* Teks Topik N / 7 di Tengah */}
+        {/* Info Topik N / total */}
         <div className="font-mono text-xs sm:text-sm" style={{ color: 'var(--text-muted)' }}>
           Topic {currentIndex + 1} / {totalTopics}
         </div>
 
-        {/* Tombol Next & Tombol Hijau Mark Complete & Next di Kanan */}
+        {/* Tombol Next & Tombol Tandai Selesai */}
         <div className="w-full sm:w-auto flex items-center justify-end gap-2.5">
-          {/* Tombol Next / Selesai */}
+          {/* Tombol Next */}
           <button
             type="button"
             onClick={handleNext}
@@ -295,39 +307,42 @@ export default function PreventiveDetailPage() {
             onMouseOver={(e) => (e.currentTarget.style.borderColor = 'var(--accent-primary)')}
             onMouseOut={(e) => (e.currentTarget.style.borderColor = 'var(--border-primary)')}
           >
-            {isLast ? 'Selesai' : 'Next'}
+            {isLast ? 'Ke Menu Preventive' : 'Next'}
           </button>
 
-          {/* Tombol Hijau Mark Complete & Next / Completed ✓ */}
-          {isCompleted ? (
-            <button
-              type="button"
-              disabled
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold cursor-not-allowed opacity-90 shadow-sm"
-              style={{
-                backgroundColor: 'rgba(32, 201, 151, 0.18)',
-                color: 'var(--color-success)',
-                border: '1px solid rgba(32, 201, 151, 0.4)',
-              }}
-            >
-              <Check size={15} />
-              <span>Completed ✓</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleMarkCompleteAndNext}
-              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-sm text-white"
-              style={{
-                backgroundColor: 'var(--color-success)',
-                border: '1px solid var(--color-success)',
-              }}
-              onMouseOver={(e) => (e.currentTarget.style.opacity = '0.9')}
-              onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
-            >
-              <span>Mark Complete & Next</span>
-            </button>
-          )}
+          {/* Tombol Tandai Selesai */}
+          <button
+            type="button"
+            disabled={isCompleted || isCompleting}
+            onClick={handleMarkComplete}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: isCompleted ? 'rgba(32, 201, 151, 0.18)' : 'var(--color-success)',
+              color: isCompleted ? 'var(--color-success)' : '#FFFFFF',
+              border: isCompleted ? '1px solid rgba(32, 201, 151, 0.4)' : '1px solid var(--color-success)',
+              opacity: isCompleting ? 0.6 : 1,
+            }}
+            onMouseOver={(e) => {
+              if (!isCompleted && !isCompleting) e.currentTarget.style.opacity = '0.9';
+            }}
+            onMouseOut={(e) => {
+              if (!isCompleted && !isCompleting) e.currentTarget.style.opacity = '1';
+            }}
+          >
+            {isCompleting ? (
+              <>
+                <Loader2 size={15} className="animate-spin" />
+                <span>Menyimpan...</span>
+              </>
+            ) : isCompleted ? (
+              <>
+                <Check size={15} />
+                <span>Selesai ✓</span>
+              </>
+            ) : (
+              <span>Tandai Selesai</span>
+            )}
+          </button>
         </div>
       </div>
     </div>

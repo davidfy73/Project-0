@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useProgressStore } from '../store/useProgressStore.js';
 import {
   ShieldCheck,
   KeyRound,
@@ -60,16 +60,7 @@ const PREVENTIVE_LIST = [
 
 export default function PreventivePage() {
   const navigate = useNavigate();
-  const [completedMap, setCompletedMap] = useState({});
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('preventive_completed') || '{}');
-      setCompletedMap(saved);
-    } catch {
-      setCompletedMap({});
-    }
-  }, []);
+  const completedPreventive = useProgressStore((state) => state.preventive);
 
   return (
     <div className="space-y-6 animate-in fade-in">
@@ -85,7 +76,7 @@ export default function PreventivePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {PREVENTIVE_LIST.map((item, idx) => {
           const Icon = item.icon;
-          const isDone = !!completedMap[item.id];
+          const isDone = completedPreventive.includes(item.id);
 
           return (
             <div
