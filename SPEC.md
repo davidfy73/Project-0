@@ -202,7 +202,7 @@ Tandai [x] jika fase selesai. Fase berbasis data/logika: backend dulu, uji denga
 - [x] Fase 3: Progres Module dan Preventive. Materi tetap file Markdown di Frontend; backend: model Progress (userId, slug materi yang sudah selesai), endpoint catat dan baca progres. Isi materi wajib diverifikasi
 - [x] Fase 4: Quiz. Backend (model Question/QuizResult; CRUD soal untuk admin di `/api/admin/questions` dengan requireRole; endpoint user ambil semua soal diacak tanpa jawaban benar + submit dan penilaian; tanpa seed, soal dibuat lewat panel admin), lalu sambungkan frontend admin halaman Quiz dan bangun ulang halaman Quiz user (quiz interaktif, feedback, skor akhir)
 - [ ] Fase 5: Dashboard VirusTotal. Backend (service, endpoint URL/file/search, cache, antrean, error limit/ukuran file), lalu frontend (tab input, tampilan hasil)
-- [ ] Fase 6: Admin Panel. Backend dulu (`/api/admin/*`: daftar + detail user, hapus user, progres user; uji dengan Postman/Thunder Client, termasuk uji user biasa ditolak 403 dan admin tidak bisa hapus admin), lalu sambungkan frontend admin halaman User dan Progress yang sudah jadi (halaman Quiz sudah disambungkan di Fase 4)
+- [x] Fase 6: Admin Panel. Backend dulu (`/api/admin/*`: daftar + detail user, hapus user, progres user; uji dengan Postman/Thunder Client, termasuk uji user biasa ditolak 403 dan admin tidak bisa hapus admin), lalu sambungkan frontend admin halaman User dan Progress yang sudah jadi (halaman Quiz sudah disambungkan di Fase 4)
 - [ ] Fase 7: About, finishing, review keamanan, deploy (Frontend ke Vercel/Netlify, Backend ke Render/Railway, DB di Atlas)
 
 ## 13. Keputusan Terbuka (isi saat sudah diputuskan)

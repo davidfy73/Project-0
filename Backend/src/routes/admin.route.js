@@ -11,6 +11,12 @@ import {
   updateQuestion,
   deleteQuestion,
 } from '../controllers/adminQuestion.controller.js';
+import {
+  getAdminUsers,
+  getAdminUserDetail,
+  deleteAdminUser,
+  getAdminProgress,
+} from '../controllers/adminUser.controller.js';
 
 const router = Router();
 
@@ -27,5 +33,11 @@ router.get('/questions', getQuestions);
 router.post('/questions', createQuestion);
 router.put('/questions/:id', updateQuestion);
 router.delete('/questions/:id', deleteQuestion);
+
+// ── Manajemen User & Pemantauan Progres (Langkah 6) ──────────────────────────────
+router.get('/users', getAdminUsers);
+router.get('/users/:id', getAdminUserDetail);
+router.delete('/users/:id', deleteAdminUser);
+router.get('/progress', getAdminProgress);
 
 export default router;

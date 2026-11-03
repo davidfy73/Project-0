@@ -16,7 +16,7 @@ Aturan tetap: role hanya `user` dan `admin`, tanpa email, rahasia hanya di `Back
 
 ```
 [x] Persiapan -> [x] Rapikan frontend -> [x] Backend dasar -> [x] Auth -> [x] Quiz
--> [x] Progress -> [ ] Admin (User + Progress) -> [ ] Scan VirusTotal -> [ ] Deploy
+-> [x] Progress -> [x] Admin (User + Progress) -> [ ] Scan VirusTotal -> [ ] Deploy
 ```
 
 Urutan ini sengaja: Auth dulu karena semua fitur lain butuh login; Quiz sebelum Admin lainnya karena soal harus bisa dibuat admin sebelum kuis user bisa diuji; Scan terakhir karena paling rumit (batas API, upload file).
@@ -101,21 +101,21 @@ Yang dibuat:
 
 Selesai jika: membaca materi menambah angka progres (misal 3/6) dan angka bertahan setelah logout dan login lagi.
 
-## Langkah 6: Admin (User dan Progress) [BERIKUTNYA]
+## Langkah 6: Admin (User dan Progress)
 
 Tujuan: admin bisa melihat, memantau, dan menghapus user.
 
 Yang dibuat:
 
-- [ ] Daftar user (dengan pencarian) dan detail user
-- [ ] Hapus user, ikut menghapus progres dan hasil kuisnya; akun admin tidak bisa dihapus
-- [ ] Progres semua user: Module x/6, Preventive x/7, skor kuis terakhir dan tertinggi
-- [ ] Semua route admin lewat `requireAuth` dan `requireRole('admin')`; respons tidak pernah memuat hash password atau token
-- [ ] Sambungkan frontend: halaman User dan Progress di admin panel
+- [x] Daftar user (dengan pencarian) dan detail user
+- [x] Hapus user, ikut menghapus progres dan hasil kuisnya; akun admin tidak bisa dihapus
+- [x] Progres semua user: Module x/6, Preventive x/7, skor kuis terakhir dan tertinggi
+- [x] Semua route admin lewat `requireAuth` dan `requireRole('admin')`; respons tidak pernah memuat hash password atau token
+- [x] Sambungkan frontend: halaman User dan Progress di admin panel
 
 Selesai jika: daftar user tampil nyata, hapus user bekerja dengan konfirmasi, progres sesuai aktivitas user, dan user biasa tidak bisa memanggil route admin.
 
-## Langkah 7: Scan VirusTotal
+## Langkah 7: Scan VirusTotal [BERIKUTNYA]
 
 Tujuan: dashboard scan memakai VirusTotal sungguhan tanpa membocorkan API key.
 
@@ -148,7 +148,7 @@ Selesai jika: kamu bisa mendaftar, login, mengerjakan kuis, dan login admin dari
 - [x] `v0.1.0` frontend selesai dengan data mock
 - [x] `v0.2.0` auth tersambung
 - [x] `v0.3.0` quiz tersambung
-- [ ] `v0.4.0` progress dan admin tersambung
+- [x] `v0.4.0` progress dan admin tersambung
 - [ ] `v0.5.0` scan tersambung
 - [ ] `v1.0.0` siap deploy
 

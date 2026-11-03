@@ -2,18 +2,26 @@
 // State autentikasi dan data admin PHISHYEARN.
 // - Autentikasi lewat /api/auth/admin-login
 // - Kelola bank soal kuis tersambung penuh ke API backend (/api/admin/questions)
-// - Data users masih mock sampai Langkah 6
+// - Kelola data user dan pemantauan progres tersambung ke /api/admin/users & /api/admin/progress
 
 import { create } from 'zustand';
-import { INITIAL_USERS } from '../mock/adminData';
 import api from '../lib/api.js';
+
+let latestUsersSearchRequestId = 0;
 
 export const useAdminStore = create((set, get) => ({
   isAdminAuthenticated: false,
   adminUser: null,
 
-  // Data user admin (Langkah 6)
-  users: INITIAL_USERS,
+  // ── Data User (Langkah 6) ──────────────────────────────────────────────────
+  users: [],
+  isLoadingUsers: false,
+  usersError: null,
+
+  // ── Data Progres Belajar Seluruh User (Langkah 6) ───────────────────────────
+  progressUsers: [],
+  isLoadingProgress: false,
+  progressError: null,
 
   // Bank Soal Kuis (Langkah 4)
   questions: [],
@@ -53,7 +61,13 @@ export const useAdminStore = create((set, get) => ({
       // Tetap bersihkan meski request gagal
     } finally {
       delete api.defaults.headers.common['Authorization'];
-      set({ isAdminAuthenticated: false, adminUser: null, _adminAccessToken: null });
+      set({
+        isAdminAuthenticated: false,
+        adminUser: null,
+        _adminAccessToken: null,
+        users: [],
+        progressUsers: [],
+      });
     }
   },
 
@@ -80,6 +94,84 @@ export const useAdminStore = create((set, get) => ({
       });
     } catch {
       set({ isAdminAuthenticated: false, adminUser: null });
+    }
+  },
+
+  // ── Operasi User Admin (Langkah 6) ─────────────────────────────────────────
+
+  // Muat daftar user (opsional search, abaikan respon lama dengan request ID)
+  fetchUsers: async (search = '') => {
+    const requestId = ++latestUsersSearchRequestId;
+    set({ isLoadingUsers: true, usersError: null });
+
+    try {
+      const trimmed = search.trim();
+      const res = await api.get('/api/admin/users', {
+        params: trimmed ? { search: trimmed } : {},
+      });
+
+      // Abaikan jika ada request search yang lebih baru
+      if (requestId === latestUsersSearchRequestId) {
+        set({
+          users: res.data.users || [],
+          isLoadingUsers: false,
+        });
+      }
+      return { success: true };
+    } catch (err) {
+      if (requestId === latestUsersSearchRequestId) {
+        const message = err.response?.data?.message || 'Gagal memuat data user.';
+        set({ isLoadingUsers: false, usersError: message });
+      }
+      return { success: false };
+    }
+  },
+
+  // Ambil detail satu user beserta ringkasan progres & kuis
+  getUserDetail: async (userId) => {
+    try {
+      const res = await api.get(`/api/admin/users/${userId}`);
+      return { success: true, user: res.data.user };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Gagal memuat detail user.';
+      return { success: false, message };
+    }
+  },
+
+  // Hapus user
+  deleteUser: async (userId) => {
+    try {
+      const res = await api.delete(`/api/admin/users/${userId}`);
+      // Hapus dari state lokal
+      set((state) => ({
+        users: state.users.filter((u) => u.id !== userId),
+        progressUsers: state.progressUsers.filter((u) => u.id !== userId),
+      }));
+      // Sinkronkan data progres di background
+      get().fetchProgress().catch(() => {});
+      return { success: true, message: res.data?.message || 'User berhasil dihapus.' };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Gagal menghapus user.';
+      return { success: false, message };
+    }
+  },
+
+  // ── Operasi Progres Belajar Seluruh User (Langkah 6) ───────────────────────
+
+  // Muat data progres seluruh user
+  fetchProgress: async () => {
+    set({ isLoadingProgress: true, progressError: null });
+    try {
+      const res = await api.get('/api/admin/progress');
+      set({
+        progressUsers: res.data.users || [],
+        isLoadingProgress: false,
+      });
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Gagal memuat progres user.';
+      set({ isLoadingProgress: false, progressError: message });
+      return { success: false, message };
     }
   },
 
@@ -146,15 +238,5 @@ export const useAdminStore = create((set, get) => ({
       const message = err.response?.data?.message || 'Gagal menghapus soal.';
       return { success: false, message };
     }
-  },
-
-  // ── Operasi User Mock (Langkah 6) ───────────────────────────────────────────
-  // TODO Langkah 6: ganti deleteUser dengan DELETE /api/admin/users/:id
-  deleteUser: (userId) => {
-    const { users } = get();
-    const targetUser = users.find((u) => u.id === userId);
-    if (!targetUser || targetUser.role === 'admin') return false;
-    set({ users: users.filter((u) => u.id !== userId) });
-    return true;
   },
 }));

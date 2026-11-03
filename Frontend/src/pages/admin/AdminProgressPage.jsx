@@ -1,8 +1,12 @@
-import { useState } from 'react';
-import { Search, LineChart, ChevronDown, ChevronUp, CheckCircle2, Circle, BookOpen, ShieldCheck, Trophy } from 'lucide-react';
+// pages/admin/AdminProgressPage.jsx
+// Halaman pemantauan progres belajar seluruh user untuk admin.
+// Mengambil data nyata dari GET /api/admin/progress.
+
+import { useState, useEffect } from 'react';
+import { Search, ChevronDown, ChevronUp, CheckCircle2, Circle, BookOpen, ShieldCheck, Trophy, Loader2, RefreshCw } from 'lucide-react';
 import { useAdminStore } from '../../store/useAdminStore';
 
-// Daftar 6 Modul dan 7 Preventive statis untuk referensi rincian ceklis
+// Daftar 6 Modul dan 7 Preventive statis untuk referensi rincian ceklis di dalam accordion
 const ALL_MODULES = [
   { id: 'phishing', title: 'Phishing' },
   { id: 'malware', title: 'Malware' },
@@ -23,11 +27,21 @@ const ALL_PREVENTIVES = [
 ];
 
 export default function AdminProgressPage() {
-  const { users } = useAdminStore();
+  const {
+    progressUsers,
+    fetchProgress,
+    isLoadingProgress,
+    progressError,
+  } = useAdminStore();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedUserId, setExpandedUserId] = useState(null);
 
-  const filteredUsers = users.filter((u) =>
+  useEffect(() => {
+    fetchProgress();
+  }, [fetchProgress]);
+
+  const filteredUsers = progressUsers.filter((u) =>
     u.username.toLowerCase().includes(searchTerm.toLowerCase().trim())
   );
 
@@ -35,10 +49,38 @@ export default function AdminProgressPage() {
     setExpandedUserId(expandedUserId === userId ? null : userId);
   };
 
+  const formatActivity = (dateStr) => {
+    if (!dateStr) return 'Belum ada';
+    const d = new Date(dateStr);
+    return isNaN(d.getTime())
+      ? 'Belum ada'
+      : d.toLocaleDateString('id-ID', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+  };
+
+  const formatQuizScore = (scoreObj) => {
+    if (!scoreObj || typeof scoreObj.score !== 'number' || typeof scoreObj.total !== 'number') {
+      return '-';
+    }
+    if (scoreObj.total <= 0) {
+      return `${scoreObj.score}/${scoreObj.total} (0%)`;
+    }
+    const pct = Math.round((scoreObj.score / scoreObj.total) * 100);
+    return `${scoreObj.score}/${scoreObj.total} (${pct}%)`;
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in pb-10">
       {/* Kolom Pencarian di Atas */}
-      <div className="border-b pb-4 flex justify-end" style={{ borderColor: 'var(--border-primary)' }}>
+      <div className="border-b pb-4 flex justify-between items-center gap-4" style={{ borderColor: 'var(--border-primary)' }}>
+        <div className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+          Total: <span className="font-bold text-[var(--text-primary)]">{progressUsers.length}</span> user
+        </div>
         <div className="relative w-full sm:w-72">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
           <input
@@ -62,19 +104,57 @@ export default function AdminProgressPage() {
         </div>
       </div>
 
+      {/* Banner Pesan Error */}
+      {progressError && (
+        <div
+          className="p-4 rounded-xl border flex items-center justify-between text-xs sm:text-sm"
+          style={{
+            backgroundColor: 'rgba(255, 91, 100, 0.1)',
+            borderColor: 'rgba(255, 91, 100, 0.3)',
+            color: 'var(--color-danger)',
+          }}
+        >
+          <span>{progressError}</span>
+          <button
+            type="button"
+            onClick={() => fetchProgress()}
+            className="px-3 py-1 rounded-lg text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
+            style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)' }}
+          >
+            <RefreshCw size={12} />
+            <span>Coba Lagi</span>
+          </button>
+        </div>
+      )}
+
       {/* Daftar User & Progres */}
       <div className="space-y-4">
-        {filteredUsers.length > 0 ? (
+        {isLoadingProgress ? (
+          <div
+            className="rounded-2xl p-12 text-center text-sm border"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border-primary)',
+              color: 'var(--text-muted)',
+            }}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 size={18} className="animate-spin text-[var(--accent-primary)]" />
+              <span>Memuat data progres user...</span>
+            </div>
+          </div>
+        ) : filteredUsers.length > 0 ? (
           filteredUsers.map((user) => {
             const isExpanded = expandedUserId === user.id;
             const p = user.progress || {};
             const modulesRead = p.modulesRead || 0;
-            const totalModules = p.totalModules || 6;
+            const totalModules = p.totalModules ?? 6;
             const preventiveRead = p.preventiveRead || 0;
-            const totalPreventive = p.totalPreventive || 7;
+            const totalPreventive = p.totalPreventive ?? 7;
 
-            const modulePercent = Math.round((modulesRead / totalModules) * 100);
-            const preventivePercent = Math.round((preventiveRead / totalPreventive) * 100);
+            // Aman dari pembagian nol
+            const modulePercent = totalModules > 0 ? Math.round((modulesRead / totalModules) * 100) : 0;
+            const preventivePercent = totalPreventive > 0 ? Math.round((preventiveRead / totalPreventive) * 100) : 0;
 
             const completedModules = p.completedModules || [];
             const completedPreventive = p.completedPreventive || [];
@@ -99,9 +179,9 @@ export default function AdminProgressPage() {
                       <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0"
                         style={{
-                          backgroundColor: user.role === 'admin' ? 'rgba(255, 91, 100, 0.15)' : 'var(--accent-deep)',
-                          color: user.role === 'admin' ? 'var(--color-danger)' : 'var(--accent-light)',
-                          border: `1px solid ${user.role === 'admin' ? 'rgba(255, 91, 100, 0.3)' : 'var(--border-secondary)'}`,
+                          backgroundColor: 'var(--accent-deep)',
+                          color: 'var(--accent-light)',
+                          border: '1px solid var(--border-secondary)',
                         }}
                       >
                         {user.username.charAt(0).toUpperCase()}
@@ -114,15 +194,15 @@ export default function AdminProgressPage() {
                           <span
                             className="text-[10px] font-mono px-1.5 py-0.2 rounded"
                             style={{
-                              backgroundColor: user.role === 'admin' ? 'rgba(255, 91, 100, 0.15)' : 'var(--bg-elevated)',
-                              color: user.role === 'admin' ? 'var(--color-danger)' : 'var(--text-secondary)',
+                              backgroundColor: 'var(--bg-elevated)',
+                              color: 'var(--text-secondary)',
                             }}
                           >
                             {user.role}
                           </span>
                         </div>
                         <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
-                          Aktivitas: {user.lastActive}
+                          Aktivitas: {formatActivity(user.lastActiveAt)}
                         </span>
                       </div>
                     </div>
@@ -178,7 +258,7 @@ export default function AdminProgressPage() {
                           className="h-full rounded-full transition-all duration-300"
                           style={{
                             width: `${preventivePercent}%`,
-                            backgroundColor: 'var(--accent-primary)',
+                            backgroundColor: 'var(--color-success)',
                           }}
                         />
                       </div>
@@ -189,16 +269,16 @@ export default function AdminProgressPage() {
                   <div className="flex items-center justify-between sm:justify-end gap-6 text-xs font-mono shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0" style={{ borderColor: 'var(--border-primary)' }}>
                     <div>
                       <div className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Kuis Terakhir</div>
-                      <div className="font-bold text-sm mt-0.5" style={{ color: 'var(--text-primary)' }}>
-                        {p.lastQuizScore || 'Belum ada'}
+                      <div className="font-bold text-xs sm:text-sm mt-0.5" style={{ color: 'var(--text-primary)' }}>
+                        {formatQuizScore(p.lastQuizScore)}
                       </div>
                     </div>
 
                     <div>
                       <div className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Skor Tertinggi</div>
-                      <div className="font-bold text-sm mt-0.5 flex items-center gap-1" style={{ color: 'var(--color-warning)' }}>
+                      <div className="font-bold text-xs sm:text-sm mt-0.5 flex items-center gap-1" style={{ color: 'var(--color-warning)' }}>
                         <Trophy size={13} />
-                        <span>{p.highestQuizScore || 'Belum ada'}</span>
+                        <span>{formatQuizScore(p.highestQuizScore)}</span>
                       </div>
                     </div>
 
@@ -218,11 +298,11 @@ export default function AdminProgressPage() {
                     }}
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Daftar 6 Module */}
+                      {/* Daftar Module */}
                       <div className="space-y-3">
                         <h4 className="text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2" style={{ color: 'var(--accent-light)' }}>
                           <BookOpen size={14} />
-                          <span>Rincian Modul ({modulesRead}/6 Selesai)</span>
+                          <span>Rincian Modul ({modulesRead}/{totalModules} Selesai)</span>
                         </h4>
 
                         <div className="space-y-1.5">
@@ -255,11 +335,11 @@ export default function AdminProgressPage() {
                         </div>
                       </div>
 
-                      {/* Daftar 7 Preventive */}
+                      {/* Daftar Preventive */}
                       <div className="space-y-3">
                         <h4 className="text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2" style={{ color: 'var(--color-success)' }}>
                           <ShieldCheck size={14} />
-                          <span>Rincian Preventive ({preventiveRead}/7 Selesai)</span>
+                          <span>Rincian Preventive ({preventiveRead}/{totalPreventive} Selesai)</span>
                         </h4>
 
                         <div className="space-y-1.5">
@@ -306,7 +386,7 @@ export default function AdminProgressPage() {
               color: 'var(--text-muted)',
             }}
           >
-            Tidak ada data progres ditemukan
+            {searchTerm ? 'Tidak ada data progres ditemukan' : 'Belum ada user'}
           </div>
         )}
       </div>

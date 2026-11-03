@@ -1,28 +1,81 @@
-import { useState } from 'react';
-import { Search, Eye, Trash2, Shield, AlertTriangle, X } from 'lucide-react';
+// pages/admin/AdminUserPage.jsx
+// Halaman kelola pengguna untuk admin.
+// Mengambil data nyata dari GET /api/admin/users dan DELETE /api/admin/users/:id.
+
+import { useState, useEffect } from 'react';
+import { Search, Eye, Trash2, AlertTriangle, X, Loader2, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAdminStore } from '../../store/useAdminStore';
 
-// TODO: Operasi daftar dan penghapusan user nanti dihubungkan ke endpoint backend:
-// GET /api/admin/users dan DELETE /api/admin/users/:id
-
 export default function AdminUserPage() {
-  const { users, deleteUser } = useAdminStore();
+  const {
+    users,
+    fetchUsers,
+    isLoadingUsers,
+    usersError,
+    deleteUser,
+    getUserDetail,
+  } = useAdminStore();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [detailUser, setDetailUser] = useState(null);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const filteredUsers = users.filter((u) =>
-    u.username.toLowerCase().includes(searchTerm.toLowerCase().trim())
-  );
+  // Pencarian dengan debounce 400ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchUsers(searchTerm);
+    }, 400);
 
-  const handleConfirmDelete = () => {
-    if (!userToDelete) return;
-    const success = deleteUser(userToDelete.id);
-    if (success) {
-      toast.success(`User ${userToDelete.username} dan seluruh progresnya berhasil dihapus`);
+    return () => clearTimeout(timer);
+  }, [searchTerm, fetchUsers]);
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    return isNaN(d.getTime())
+      ? '-'
+      : d.toLocaleDateString('id-ID', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+  };
+
+  const formatScore = (scoreObj) => {
+    if (!scoreObj || typeof scoreObj.score !== 'number' || typeof scoreObj.total !== 'number') {
+      return '-';
+    }
+    if (scoreObj.total <= 0) {
+      return `${scoreObj.score}/${scoreObj.total} (0%)`;
+    }
+    const pct = Math.round((scoreObj.score / scoreObj.total) * 100);
+    return `${scoreObj.score}/${scoreObj.total} (${pct}%)`;
+  };
+
+  const handleOpenDetail = async (user) => {
+    setDetailUser(user);
+    setIsLoadingDetail(true);
+    const res = await getUserDetail(user.id);
+    if (res.success && res.user) {
+      setDetailUser(res.user);
+    }
+    setIsLoadingDetail(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!userToDelete || isDeleting) return;
+    setIsDeleting(true);
+    const res = await deleteUser(userToDelete.id);
+    setIsDeleting(false);
+    if (res.success) {
+      toast.success(res.message || `User ${userToDelete.username} dan seluruh datanya berhasil dihapus.`);
     } else {
-      toast.error('Akun admin dilindungi dan tidak dapat dihapus');
+      toast.error(res.message);
     }
     setUserToDelete(null);
   };
@@ -30,7 +83,10 @@ export default function AdminUserPage() {
   return (
     <div className="space-y-6 animate-in fade-in pb-10">
       {/* Kolom Pencarian di Atas */}
-      <div className="border-b pb-4 flex justify-end" style={{ borderColor: 'var(--border-primary)' }}>
+      <div className="border-b pb-4 flex justify-between items-center gap-4" style={{ borderColor: 'var(--border-primary)' }}>
+        <div className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+          Total: <span className="font-bold text-[var(--text-primary)]">{users.length}</span> user
+        </div>
         <div className="relative w-full sm:w-72">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
           <input
@@ -53,6 +109,29 @@ export default function AdminUserPage() {
           />
         </div>
       </div>
+
+      {/* Banner Pesan Error */}
+      {usersError && (
+        <div
+          className="p-4 rounded-xl border flex items-center justify-between text-xs sm:text-sm"
+          style={{
+            backgroundColor: 'rgba(255, 91, 100, 0.1)',
+            borderColor: 'rgba(255, 91, 100, 0.3)',
+            color: 'var(--color-danger)',
+          }}
+        >
+          <span>{usersError}</span>
+          <button
+            type="button"
+            onClick={() => fetchUsers(searchTerm)}
+            className="px-3 py-1 rounded-lg text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
+            style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)' }}
+          >
+            <RefreshCw size={12} />
+            <span>Coba Lagi</span>
+          </button>
+        </div>
+      )}
 
       {/* Tabel Desktop (hidden pada layar < 640px) */}
       <div
@@ -80,8 +159,17 @@ export default function AdminUserPage() {
             </tr>
           </thead>
           <tbody className="divide-y text-xs sm:text-sm" style={{ borderColor: 'var(--border-primary)' }}>
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => {
+            {isLoadingUsers ? (
+              <tr>
+                <td colSpan={5} className="py-12 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 size={16} className="animate-spin text-[var(--accent-primary)]" />
+                    <span>Memuat data user...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : users.length > 0 ? (
+              users.map((user) => {
                 const isAdmin = user.role === 'admin';
                 return (
                   <tr
@@ -104,16 +192,16 @@ export default function AdminUserPage() {
                       </span>
                     </td>
                     <td className="py-4 px-5 font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>
-                      {user.registeredAt}
+                      {formatDate(user.createdAt)}
                     </td>
                     <td className="py-4 px-5 font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>
-                      {user.lastActive}
+                      {formatDate(user.lastActiveAt)}
                     </td>
                     <td className="py-4 px-5 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
-                          onClick={() => setDetailUser(user)}
+                          onClick={() => handleOpenDetail(user)}
                           className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors inline-flex items-center gap-1.5"
                           style={{
                             backgroundColor: 'var(--bg-elevated)',
@@ -179,8 +267,22 @@ export default function AdminUserPage() {
 
       {/* Kartu Mobile (< 640px) */}
       <div className="sm:hidden space-y-3">
-        {filteredUsers.length > 0 ? (
-          filteredUsers.map((user) => {
+        {isLoadingUsers ? (
+          <div
+            className="rounded-2xl p-8 text-center text-xs border"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border-primary)',
+              color: 'var(--text-muted)',
+            }}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 size={16} className="animate-spin text-[var(--accent-primary)]" />
+              <span>Memuat data user...</span>
+            </div>
+          </div>
+        ) : users.length > 0 ? (
+          users.map((user) => {
             const isAdmin = user.role === 'admin';
             return (
               <div
@@ -208,14 +310,14 @@ export default function AdminUserPage() {
                 </div>
 
                 <div className="text-xs space-y-1 font-mono" style={{ color: 'var(--text-secondary)' }}>
-                  <div>Daftar: {user.registeredAt}</div>
-                  <div>Aktivitas: {user.lastActive}</div>
+                  <div>Daftar: {formatDate(user.createdAt)}</div>
+                  <div>Aktivitas: {formatDate(user.lastActiveAt)}</div>
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-2 border-t" style={{ borderColor: 'var(--border-primary)' }}>
                   <button
                     type="button"
-                    onClick={() => setDetailUser(user)}
+                    onClick={() => handleOpenDetail(user)}
                     className="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5"
                     style={{
                       backgroundColor: 'var(--bg-elevated)',
@@ -293,32 +395,72 @@ export default function AdminUserPage() {
               Detail Pengguna
             </h3>
 
-            <div className="space-y-3.5 text-xs sm:text-sm">
-              <div className="flex justify-between py-2 border-b" style={{ borderColor: 'var(--border-primary)' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Username:</span>
-                <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{detailUser.username}</span>
+            {isLoadingDetail ? (
+              <div className="py-8 text-center text-xs flex items-center justify-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                <Loader2 size={16} className="animate-spin text-[var(--accent-primary)]" />
+                <span>Memuat detail...</span>
               </div>
-              <div className="flex justify-between py-2 border-b" style={{ borderColor: 'var(--border-primary)' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Role:</span>
-                <span
-                  className="text-xs font-mono uppercase px-2 py-0.5 rounded font-bold"
-                  style={{
-                    backgroundColor: detailUser.role === 'admin' ? 'rgba(255, 91, 100, 0.15)' : 'var(--accent-glow)',
-                    color: detailUser.role === 'admin' ? 'var(--color-danger)' : 'var(--accent-light)',
-                  }}
-                >
-                  {detailUser.role}
-                </span>
+            ) : (
+              <div className="space-y-3.5 text-xs sm:text-sm">
+                <div className="flex justify-between py-2 border-b" style={{ borderColor: 'var(--border-primary)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Username:</span>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{detailUser.username}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b" style={{ borderColor: 'var(--border-primary)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Role:</span>
+                  <span
+                    className="text-xs font-mono uppercase px-2 py-0.5 rounded font-bold"
+                    style={{
+                      backgroundColor: detailUser.role === 'admin' ? 'rgba(255, 91, 100, 0.15)' : 'var(--accent-glow)',
+                      color: detailUser.role === 'admin' ? 'var(--color-danger)' : 'var(--accent-light)',
+                    }}
+                  >
+                    {detailUser.role}
+                  </span>
+                </div>
+                <div className="flex justify-between py-2 border-b" style={{ borderColor: 'var(--border-primary)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Tanggal Daftar:</span>
+                  <span className="font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>{formatDate(detailUser.createdAt)}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b" style={{ borderColor: 'var(--border-primary)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Aktivitas Terakhir:</span>
+                  <span className="font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>{formatDate(detailUser.lastActiveAt)}</span>
+                </div>
+
+                {/* Ringkasan Progres jika ada */}
+                {detailUser.progress && (
+                  <div className="pt-2 space-y-2">
+                    <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                      Ringkasan Aktivitas Belajar
+                    </div>
+                    <div className="flex justify-between py-1.5 border-b" style={{ borderColor: 'var(--border-primary)' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Materi Module:</span>
+                      <span className="font-mono text-xs font-semibold" style={{ color: 'var(--accent-light)' }}>
+                        {detailUser.progress.modulesRead}/{detailUser.progress.totalModules}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-1.5 border-b" style={{ borderColor: 'var(--border-primary)' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Materi Preventive:</span>
+                      <span className="font-mono text-xs font-semibold" style={{ color: 'var(--color-success)' }}>
+                        {detailUser.progress.preventiveRead}/{detailUser.progress.totalPreventive}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-1.5 border-b" style={{ borderColor: 'var(--border-primary)' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Kuis Terakhir:</span>
+                      <span className="font-mono text-xs" style={{ color: 'var(--text-primary)' }}>
+                        {formatScore(detailUser.progress.lastQuizScore)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-1.5" style={{ borderColor: 'var(--border-primary)' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Skor Tertinggi:</span>
+                      <span className="font-mono text-xs font-bold" style={{ color: 'var(--color-warning)' }}>
+                        {formatScore(detailUser.progress.highestQuizScore)}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex justify-between py-2 border-b" style={{ borderColor: 'var(--border-primary)' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Tanggal Daftar:</span>
-                <span className="font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>{detailUser.registeredAt}</span>
-              </div>
-              <div className="flex justify-between py-2" style={{ borderColor: 'var(--border-primary)' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Aktivitas Terakhir:</span>
-                <span className="font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>{detailUser.lastActive}</span>
-              </div>
-            </div>
+            )}
 
             <div className="mt-6 pt-4 border-t flex justify-end" style={{ borderColor: 'var(--border-primary)' }}>
               <button
@@ -365,14 +507,15 @@ export default function AdminUserPage() {
 
             <p className="text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
               Hapus user <strong style={{ color: 'var(--text-primary)' }}>{userToDelete.username}</strong>?
-              Progres dan hasil kuis user ini ikut terhapus. Tindakan ini tidak bisa dibatalkan.
+              Progres belajar dan riwayat kuis user ini ikut terhapus. Tindakan ini tidak bisa dibatalkan.
             </p>
 
             <div className="pt-2 flex items-center justify-end gap-3">
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={() => setUserToDelete(null)}
-                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer disabled:opacity-50"
                 style={{
                   backgroundColor: 'var(--bg-elevated)',
                   color: 'var(--text-primary)',
@@ -383,15 +526,17 @@ export default function AdminUserPage() {
               </button>
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={handleConfirmDelete}
-                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-colors"
+                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
                 style={{
                   backgroundColor: 'var(--color-danger)',
                   color: '#FFFFFF',
                   border: 'none',
                 }}
               >
-                Hapus
+                {isDeleting && <Loader2 size={13} className="animate-spin" />}
+                <span>{isDeleting ? 'Menghapus...' : 'Hapus'}</span>
               </button>
             </div>
           </div>
