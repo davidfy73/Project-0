@@ -12,6 +12,7 @@ import env from './config/env.js';
 import healthRouter from './routes/health.route.js';
 import authRouter from './routes/auth.route.js';
 import adminRouter from './routes/admin.route.js';
+import quizRouter from './routes/quiz.route.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -67,6 +68,7 @@ app.use((req, _res, next) => {
 app.use('/api/health', healthRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/quiz', quizRouter);
 
 // ── Fallthrough handlers ────────────────────────────────────────────────────────
 app.use(notFoundHandler);

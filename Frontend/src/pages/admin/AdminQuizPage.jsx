@@ -10,12 +10,10 @@ import {
   AlertTriangle,
   X,
   CheckCircle2,
+  Loader2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAdminStore } from '../../store/useAdminStore';
-
-// TODO: Operasi CRUD soal kuis nanti dihubungkan ke endpoint backend:
-// GET /api/admin/questions, POST /api/admin/questions, PUT /api/admin/questions/:id, DELETE /api/admin/questions/:id
 
 const questionSchema = z
   .object({
@@ -48,11 +46,25 @@ const questionSchema = z
   );
 
 export default function AdminQuizPage() {
-  const { questions, addQuestion, updateQuestion, deleteQuestion } = useAdminStore();
+  const {
+    questions,
+    isLoadingQuestions,
+    fetchQuestions,
+    addQuestion,
+    updateQuestion,
+    deleteQuestion,
+  } = useAdminStore();
+
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [modalMode, setModalMode] = useState(null); // 'add' | 'edit' | null
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [questionToDelete, setQuestionToDelete] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    fetchQuestions();
+  }, [fetchQuestions]);
 
   const filteredQuestions = questions.filter((q) => {
     if (categoryFilter === 'all') return true;
@@ -87,10 +99,10 @@ export default function AdminQuizPage() {
       reset({
         category: editingQuestion.category,
         question: editingQuestion.question,
-        optionA: editingQuestion.options[0] || '',
-        optionB: editingQuestion.options[1] || '',
-        optionC: editingQuestion.options[2] || '',
-        optionD: editingQuestion.options[3] || '',
+        optionA: editingQuestion.options?.[0] || '',
+        optionB: editingQuestion.options?.[1] || '',
+        optionC: editingQuestion.options?.[2] || '',
+        optionD: editingQuestion.options?.[3] || '',
         correctIndex: editingQuestion.correctIndex ?? 0,
         explanation: editingQuestion.explanation || '',
       });
@@ -108,7 +120,8 @@ export default function AdminQuizPage() {
     }
   }, [modalMode, editingQuestion, reset]);
 
-  const onFormSubmit = (data) => {
+  const onFormSubmit = async (data) => {
+    setIsSubmitting(true);
     const formattedData = {
       category: data.category,
       question: data.question.trim(),
@@ -123,31 +136,56 @@ export default function AdminQuizPage() {
     };
 
     if (modalMode === 'add') {
-      addQuestion(formattedData);
-      toast.success('Soal baru berhasil ditambahkan');
+      const res = await addQuestion(formattedData);
+      if (res.success) {
+        toast.success('Soal baru berhasil ditambahkan');
+        setModalMode(null);
+        setEditingQuestion(null);
+      } else {
+        toast.error(res.message);
+      }
     } else if (modalMode === 'edit' && editingQuestion) {
-      updateQuestion(editingQuestion.id, formattedData);
-      toast.success('Soal berhasil diperbarui');
+      const res = await updateQuestion(editingQuestion.id, formattedData);
+      if (res.success) {
+        toast.success('Soal berhasil diperbarui');
+        setModalMode(null);
+        setEditingQuestion(null);
+      } else {
+        toast.error(res.message);
+      }
     }
-
-    setModalMode(null);
-    setEditingQuestion(null);
+    setIsSubmitting(false);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!questionToDelete) return;
-    deleteQuestion(questionToDelete.id);
-    toast.success('Soal berhasil dihapus');
-    setQuestionToDelete(null);
+    setIsDeleting(true);
+    const res = await deleteQuestion(questionToDelete.id);
+    if (res.success) {
+      toast.success('Soal berhasil dihapus');
+      setQuestionToDelete(null);
+    } else {
+      toast.error(res.message);
+    }
+    setIsDeleting(false);
   };
 
   return (
     <div className="space-y-6 animate-in fade-in pb-10">
       {/* Header Halaman (Tombol Tambah Soal) */}
       <div
-        className="border-b pb-4 flex justify-end"
+        className="border-b pb-4 flex justify-between items-center"
         style={{ borderColor: 'var(--border-primary)' }}
       >
+        <div>
+          <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+            Kelola Bank Soal Kuis
+          </h2>
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            Total soal di bank: {questions.length} soal
+          </p>
+        </div>
+
         <button
           type="button"
           onClick={() => {
@@ -200,135 +238,150 @@ export default function AdminQuizPage() {
         ))}
       </div>
 
-      {/* Daftar Soal */}
-      <div className="space-y-3.5">
-        {filteredQuestions.length > 0 ? (
-          filteredQuestions.map((q, idx) => {
-            const isModule = q.category === 'module';
-            return (
-              <div
-                key={q.id}
-                className="rounded-2xl p-4 sm:p-5 border transition-all space-y-3"
-                style={{
-                  backgroundColor: 'var(--bg-card)',
-                  borderColor: 'var(--border-primary)',
-                }}
-              >
-                {/* Header Kartu Soal */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0"
-                      style={{
-                        backgroundColor: 'var(--bg-elevated)',
-                        color: 'var(--text-secondary)',
-                        border: '1px solid var(--border-secondary)',
-                      }}
-                    >
-                      {idx + 1}
-                    </span>
-                    <span
-                      className="text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded-md"
-                      style={{
-                        backgroundColor: isModule ? 'var(--accent-glow)' : 'rgba(32, 201, 151, 0.15)',
-                        color: isModule ? 'var(--accent-light)' : 'var(--color-success)',
-                        border: `1px solid ${isModule ? 'rgba(59, 130, 246, 0.3)' : 'rgba(32, 201, 151, 0.3)'}`,
-                      }}
-                    >
-                      {q.category}
-                    </span>
-                  </div>
-
-                  {/* Aksi Edit & Hapus */}
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingQuestion(q);
-                        setModalMode('edit');
-                      }}
-                      className="p-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors"
-                      style={{
-                        backgroundColor: 'var(--bg-elevated)',
-                        color: 'var(--text-primary)',
-                        border: '1px solid var(--border-primary)',
-                      }}
-                      title="Edit Soal"
-                    >
-                      <Edit2 size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setQuestionToDelete(q)}
-                      className="p-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors"
-                      style={{
-                        backgroundColor: 'rgba(255, 91, 100, 0.12)',
-                        color: 'var(--color-danger)',
-                        border: '1px solid rgba(255, 91, 100, 0.3)',
-                      }}
-                      title="Hapus Soal"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Teks Pertanyaan */}
-                <p className="text-sm font-semibold leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-                  {q.question}
-                </p>
-
-                {/* Opsi Jawaban (Ringkas) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                  {q.options.map((opt, oIdx) => {
-                    const isCorrect = oIdx === q.correctIndex;
-                    const letter = ['A', 'B', 'C', 'D'][oIdx];
-                    return (
-                      <div
-                        key={oIdx}
-                        className="px-3 py-2 rounded-xl text-xs flex items-center gap-2 border"
-                        style={{
-                          backgroundColor: isCorrect ? 'rgba(32, 201, 151, 0.1)' : 'var(--bg-elevated)',
-                          borderColor: isCorrect ? 'var(--color-success)' : 'var(--border-primary)',
-                          color: isCorrect ? 'var(--color-success)' : 'var(--text-secondary)',
-                        }}
-                      >
-                        <span className="font-bold font-mono">{letter}.</span>
-                        <span className="truncate">{opt}</span>
-                        {isCorrect && <CheckCircle2 size={13} className="ml-auto shrink-0" />}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Penjelasan */}
+      {/* Loading state */}
+      {isLoadingQuestions && questions.length === 0 ? (
+        <div className="py-12 flex flex-col items-center justify-center space-y-3">
+          <Loader2 className="animate-spin" size={28} style={{ color: 'var(--accent-primary)' }} />
+          <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+            Memuat daftar bank soal...
+          </p>
+        </div>
+      ) : (
+        /* Daftar Soal */
+        <div className="space-y-3.5">
+          {filteredQuestions.length > 0 ? (
+            filteredQuestions.map((q, idx) => {
+              const isModule = q.category === 'module';
+              return (
                 <div
-                  className="p-2.5 rounded-xl text-xs leading-relaxed border"
+                  key={q.id}
+                  className="rounded-2xl p-4 sm:p-5 border transition-all space-y-3"
                   style={{
-                    backgroundColor: 'var(--bg-elevated)',
+                    backgroundColor: 'var(--bg-card)',
                     borderColor: 'var(--border-primary)',
-                    color: 'var(--text-muted)',
                   }}
                 >
-                  <strong style={{ color: 'var(--text-secondary)' }}>Penjelasan: </strong>
-                  {q.explanation}
+                  {/* Header Kartu Soal */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0"
+                        style={{
+                          backgroundColor: 'var(--bg-elevated)',
+                          color: 'var(--text-secondary)',
+                          border: '1px solid var(--border-secondary)',
+                        }}
+                      >
+                        {idx + 1}
+                      </span>
+                      <span
+                        className="text-[10px] font-mono font-semibold uppercase px-2 py-0.5 rounded-md"
+                        style={{
+                          backgroundColor: isModule ? 'var(--accent-glow)' : 'rgba(32, 201, 151, 0.15)',
+                          color: isModule ? 'var(--accent-light)' : 'var(--color-success)',
+                          border: `1px solid ${isModule ? 'rgba(59, 130, 246, 0.3)' : 'rgba(32, 201, 151, 0.3)'}`,
+                        }}
+                      >
+                        {q.category}
+                      </span>
+                    </div>
+
+                    {/* Aksi Edit & Hapus */}
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingQuestion(q);
+                          setModalMode('edit');
+                        }}
+                        className="p-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors"
+                        style={{
+                          backgroundColor: 'var(--bg-elevated)',
+                          color: 'var(--text-secondary)',
+                          border: '1px solid var(--border-primary)',
+                        }}
+                        onMouseOver={(e) => (e.currentTarget.style.color = 'var(--accent-primary)')}
+                        onMouseOut={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
+                        aria-label="Edit Soal"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setQuestionToDelete(q)}
+                        className="p-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors"
+                        style={{
+                          backgroundColor: 'rgba(255, 91, 100, 0.1)',
+                          color: 'var(--color-danger)',
+                          border: '1px solid rgba(255, 91, 100, 0.25)',
+                        }}
+                        onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 91, 100, 0.2)')}
+                        onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 91, 100, 0.1)')}
+                        aria-label="Hapus Soal"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Pertanyaan */}
+                  <p className="text-sm font-semibold leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                    {q.question}
+                  </p>
+
+                  {/* 4 Pilihan Jawaban */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    {q.options?.map((opt, optIdx) => {
+                      const isCorrect = optIdx === q.correctIndex;
+                      const letters = ['A', 'B', 'C', 'D'];
+                      return (
+                        <div
+                          key={optIdx}
+                          className="flex items-start gap-2 p-2.5 rounded-xl border text-xs"
+                          style={{
+                            backgroundColor: isCorrect ? 'rgba(32, 201, 151, 0.1)' : 'var(--bg-elevated)',
+                            borderColor: isCorrect ? 'var(--color-success)' : 'var(--border-primary)',
+                            color: isCorrect ? 'var(--color-success)' : 'var(--text-secondary)',
+                          }}
+                        >
+                          <span className="font-bold font-mono shrink-0">{letters[optIdx]}.</span>
+                          <span className="flex-1 font-medium">{opt}</span>
+                          {isCorrect && <CheckCircle2 size={14} className="shrink-0 mt-0.5" />}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Penjelasan Jawaban */}
+                  <div
+                    className="p-3 rounded-xl border text-xs leading-relaxed"
+                    style={{
+                      backgroundColor: 'var(--bg-elevated)',
+                      borderColor: 'var(--border-primary)',
+                      color: 'var(--text-muted)',
+                    }}
+                  >
+                    <span className="font-semibold text-white mr-1.5">Penjelasan:</span>
+                    <span>{q.explanation}</span>
+                  </div>
                 </div>
-              </div>
-            );
-          })
-        ) : (
-          <div
-            className="rounded-2xl p-12 text-center text-sm border"
-            style={{
-              backgroundColor: 'var(--bg-card)',
-              borderColor: 'var(--border-primary)',
-              color: 'var(--text-muted)',
-            }}
-          >
-            Tidak ada soal pada kategori ini
-          </div>
-        )}
-      </div>
+              );
+            })
+          ) : (
+            <div
+              className="py-12 rounded-2xl border text-center text-xs"
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-primary)',
+                color: 'var(--text-muted)',
+              }}
+            >
+              Belum ada soal pada kategori ini. Klik "Tambah Soal" untuk membuat soal pertama.
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Modal Tambah / Edit Soal */}
       {modalMode && (
@@ -342,11 +395,12 @@ export default function AdminQuizPage() {
           >
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={() => {
                 setModalMode(null);
                 setEditingQuestion(null);
               }}
-              className="absolute right-4 top-4 p-1.5 rounded-lg cursor-pointer"
+              className="absolute right-4 top-4 p-1.5 rounded-lg cursor-pointer disabled:opacity-50"
               style={{ color: 'var(--text-muted)' }}
             >
               <X size={18} />
@@ -359,36 +413,43 @@ export default function AdminQuizPage() {
             <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
               {/* Kategori */}
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                   Kategori Materi
                 </label>
-                <select
-                  {...register('category')}
-                  className="w-full h-10 px-3 rounded-xl text-xs sm:text-sm outline-none transition-all cursor-pointer"
-                  style={{
-                    backgroundColor: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-primary)',
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  <option value="module">Module (Ancaman Siber)</option>
-                  <option value="preventive">Preventive (Pencegahan & Best Practice)</option>
-                </select>
-                {errors.category && (
-                  <p className="text-xs mt-1" style={{ color: 'var(--color-danger)' }}>
-                    {errors.category.message}
-                  </p>
-                )}
+                <div className="grid grid-cols-2 gap-3">
+                  {['module', 'preventive'].map((cat) => (
+                    <label
+                      key={cat}
+                      className="flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer text-xs font-semibold capitalize transition-all"
+                      style={{
+                        backgroundColor:
+                          watch('category') === cat ? 'var(--accent-glow)' : 'var(--bg-elevated)',
+                        borderColor:
+                          watch('category') === cat ? 'var(--accent-primary)' : 'var(--border-primary)',
+                        color:
+                          watch('category') === cat ? 'var(--accent-light)' : 'var(--text-secondary)',
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        value={cat}
+                        {...register('category')}
+                        className="accent-blue-500"
+                      />
+                      <span>{cat}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               {/* Teks Pertanyaan */}
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
-                  Pertanyaan (Min. 10 Karakter)
+                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  Pertanyaan
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Tuliskan pertanyaan kuis..."
+                  placeholder="Masukkan kalimat pertanyaan kuis..."
                   {...register('question')}
                   className="w-full p-3 rounded-xl text-xs sm:text-sm outline-none transition-all resize-none"
                   style={{
@@ -404,57 +465,64 @@ export default function AdminQuizPage() {
                 )}
               </div>
 
-              {/* 4 Pilihan Jawaban (A-D) & Radio Jawaban Benar */}
-              <div className="space-y-2.5">
-                <label className="block text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                  Pilihan Jawaban (Pilih radio untuk menandai jawaban benar)
+              {/* 4 Pilihan Jawaban */}
+              <div>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  Pilihan Jawaban (Pilih radio pada jawaban yang benar)
                 </label>
-
-                {[
-                  { key: 'optionA', label: 'A', idx: 0 },
-                  { key: 'optionB', label: 'B', idx: 1 },
-                  { key: 'optionC', label: 'C', idx: 2 },
-                  { key: 'optionD', label: 'D', idx: 3 },
-                ].map((item) => (
-                  <div key={item.key}>
-                    <div className="flex items-center gap-2">
-                      <label className="flex items-center gap-1.5 cursor-pointer shrink-0 select-none">
-                        <input
-                          type="radio"
-                          value={item.idx}
-                          checked={Number(selectedCorrect) === item.idx}
-                          onChange={() => setValue('correctIndex', item.idx)}
-                          className="accent-[var(--color-success)] w-4 h-4 cursor-pointer"
-                        />
-                        <span className="font-bold font-mono text-xs w-4 text-center" style={{ color: 'var(--text-primary)' }}>
-                          {item.label}
-                        </span>
-                      </label>
-
-                      <input
-                        type="text"
-                        placeholder={`Teks pilihan jawaban ${item.label}`}
-                        {...register(item.key)}
-                        className="flex-1 h-10 px-3 rounded-xl text-xs outline-none transition-all"
-                        style={{
-                          backgroundColor: 'var(--bg-elevated)',
-                          border: `1px solid ${errors[item.key] ? 'var(--color-danger)' : 'var(--border-primary)'}`,
-                          color: 'var(--text-primary)',
-                        }}
-                      />
-                    </div>
-                    {errors[item.key] && (
-                      <p className="text-xs mt-1 ml-9" style={{ color: 'var(--color-danger)' }}>
-                        {errors[item.key].message}
-                      </p>
-                    )}
-                  </div>
-                ))}
+                <div className="space-y-2">
+                  {[
+                    { field: 'optionA', label: 'A', idx: 0 },
+                    { field: 'optionB', label: 'B', idx: 1 },
+                    { field: 'optionC', label: 'C', idx: 2 },
+                    { field: 'optionD', label: 'D', idx: 3 },
+                  ].map(({ field, label, idx }) => {
+                    const isSelected = selectedCorrect === idx;
+                    return (
+                      <div key={field}>
+                        <div
+                          className="flex items-center gap-2 p-1.5 pl-3 rounded-xl border transition-all"
+                          style={{
+                            backgroundColor: isSelected ? 'rgba(32, 201, 151, 0.08)' : 'var(--bg-elevated)',
+                            borderColor: isSelected ? 'var(--color-success)' : 'var(--border-primary)',
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="correctIndex"
+                            checked={isSelected}
+                            onChange={() => setValue('correctIndex', idx)}
+                            className="accent-emerald-500 cursor-pointer"
+                            aria-label={`Jadikan opsi ${label} sebagai kunci jawaban`}
+                          />
+                          <span
+                            className="font-bold font-mono text-xs shrink-0 select-none"
+                            style={{ color: isSelected ? 'var(--color-success)' : 'var(--text-secondary)' }}
+                          >
+                            {label}.
+                          </span>
+                          <input
+                            type="text"
+                            placeholder={`Teks pilihan ${label}`}
+                            {...register(field)}
+                            className="w-full bg-transparent p-1.5 text-xs sm:text-sm outline-none"
+                            style={{ color: 'var(--text-primary)' }}
+                          />
+                        </div>
+                        {errors[field] && (
+                          <p className="text-xs mt-1 pl-1" style={{ color: 'var(--color-danger)' }}>
+                            {errors[field]?.message}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Penjelasan */}
+              {/* Penjelasan Jawaban */}
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                   Penjelasan Singkat (Feedback)
                 </label>
                 <textarea
@@ -479,11 +547,12 @@ export default function AdminQuizPage() {
               <div className="pt-3 border-t flex justify-end gap-3" style={{ borderColor: 'var(--border-primary)' }}>
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => {
                     setModalMode(null);
                     setEditingQuestion(null);
                   }}
-                  className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer disabled:opacity-50"
                   style={{
                     backgroundColor: 'var(--bg-elevated)',
                     color: 'var(--text-primary)',
@@ -494,7 +563,8 @@ export default function AdminQuizPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-colors"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-colors inline-flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{
                     backgroundColor: 'var(--accent-primary)',
                     color: 'var(--text-on-accent)',
@@ -503,7 +573,8 @@ export default function AdminQuizPage() {
                   onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'var(--accent-hover)')}
                   onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'var(--accent-primary)')}
                 >
-                  {modalMode === 'add' ? 'Simpan Soal' : 'Simpan Perubahan'}
+                  {isSubmitting && <Loader2 size={14} className="animate-spin" />}
+                  <span>{modalMode === 'add' ? 'Simpan Soal' : 'Simpan Perubahan'}</span>
                 </button>
               </div>
             </form>
@@ -543,8 +614,9 @@ export default function AdminQuizPage() {
             <div className="pt-2 flex items-center justify-end gap-3">
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={() => setQuestionToDelete(null)}
-                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer disabled:opacity-50"
                 style={{
                   backgroundColor: 'var(--bg-elevated)',
                   color: 'var(--text-primary)',
@@ -555,15 +627,17 @@ export default function AdminQuizPage() {
               </button>
               <button
                 type="button"
+                disabled={isDeleting}
                 onClick={handleConfirmDelete}
-                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-colors"
+                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-colors inline-flex items-center gap-2 disabled:opacity-60"
                 style={{
                   backgroundColor: 'var(--color-danger)',
                   color: '#FFFFFF',
                   border: 'none',
                 }}
               >
-                Hapus
+                {isDeleting && <Loader2 size={14} className="animate-spin" />}
+                <span>Hapus</span>
               </button>
             </div>
           </div>
