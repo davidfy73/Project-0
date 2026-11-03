@@ -4,7 +4,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, Shield } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/useAuthStore';
+import api from '../lib/api.js';
 
 const loginSchema = z.object({
   username: z
@@ -21,20 +23,39 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuthStore();
   const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data) => {
-    login({ username: data.username });
-    navigate('/dashboard');
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    try {
+      const res = await api.post('/api/auth/login', {
+        username: data.username,
+        password: data.password,
+      });
+      login(res.data.user, res.data.accessToken);
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      const message =
+        err.response?.data?.message ??
+        (!err.response
+          ? 'Gagal terhubung ke server backend. Pastikan server backend sudah dijalankan di port 5000.'
+          : 'Terjadi kesalahan. Coba lagi.');
+      setError('root', { message });
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -185,9 +206,24 @@ export default function LoginPage() {
             )}
           </div>
 
+          {/* Error dari server (username/password salah, rate limit, dll) */}
+          {errors.root && (
+            <p
+              className="text-xs text-center py-2 px-3 rounded-lg"
+              style={{
+                color: 'var(--color-danger)',
+                backgroundColor: 'rgba(255, 91, 100, 0.1)',
+                border: '1px solid rgba(255, 91, 100, 0.25)',
+              }}
+            >
+              {errors.root.message}
+            </p>
+          )}
+
           <button
             type="submit"
-            className="w-full h-11 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 mt-2"
+            disabled={isLoading}
+            className="w-full h-11 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
               backgroundColor: 'var(--accent-primary)',
               color: 'var(--text-on-accent)',
@@ -202,7 +238,7 @@ export default function LoginPage() {
               e.currentTarget.style.boxShadow = 'none';
             }}
           >
-            Sign In
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 

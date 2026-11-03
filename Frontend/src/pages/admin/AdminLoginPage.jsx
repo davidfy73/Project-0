@@ -6,10 +6,6 @@ import { z } from 'zod';
 import { Eye, EyeOff, ShieldAlert } from 'lucide-react';
 import { useAdminStore } from '../../store/useAdminStore';
 
-// TODO: Kredensial ini HANYA untuk mock frontend dan akan dihapus saat backend siap.
-// Admin asli dibuat lewat seed script di backend dengan nilai rahasia dari .env.
-// Pengecekan role admin yang sebenarnya dilakukan di backend dengan middleware requireRole.
-
 const adminLoginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),
@@ -17,6 +13,7 @@ const adminLoginSchema = z.object({
 
 export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const { loginAdmin } = useAdminStore();
   const navigate = useNavigate();
@@ -29,14 +26,16 @@ export default function AdminLoginPage() {
     resolver: zodResolver(adminLoginSchema),
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
+    setIsLoading(true);
     setErrorMessage('');
-    const res = loginAdmin(data.username, data.password);
+    const res = await loginAdmin(data.username, data.password);
     if (res.success) {
-      navigate('/admin/user');
+      navigate('/admin/user', { replace: true });
     } else {
-      setErrorMessage(res.message ? 'Invalid username or password' : 'Invalid username or password');
+      setErrorMessage('Username atau password salah.');
     }
+    setIsLoading(false);
   };
 
   return (
@@ -215,7 +214,8 @@ export default function AdminLoginPage() {
 
           <button
             type="submit"
-            className="w-full h-11 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 mt-2"
+            disabled={isLoading}
+            className="w-full h-11 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
               backgroundColor: 'var(--accent-primary)',
               color: 'var(--text-on-accent)',
@@ -230,7 +230,7 @@ export default function AdminLoginPage() {
               e.currentTarget.style.boxShadow = 'none';
             }}
           >
-            Sign In
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
       </div>

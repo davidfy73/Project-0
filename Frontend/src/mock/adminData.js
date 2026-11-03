@@ -1,11 +1,8 @@
-// TODO: Kredensial ini HANYA untuk mock frontend dan akan dihapus saat backend siap.
-// Pada fase backend nanti, akun admin asli dibuat melalui seed script di backend dengan nilai rahasia dari .env.
-// Pengecekan role admin yang sebenarnya juga dilakukan di backend (middleware requireRole).
-
-export const MOCK_ADMIN_CREDENTIALS = {
-  username: 'root',
-  password: 'admin//404',
-};
+// mock/adminData.js
+// Data mock sementara untuk admin panel.
+// - INITIAL_USERS: akan diganti dengan GET /api/admin/users di Langkah 6
+// - INITIAL_QUESTIONS: akan diganti dengan GET /api/admin/questions di Langkah 4
+// MOCK_ADMIN_CREDENTIALS dihapus — admin sekarang login lewat /api/auth/admin-login
 
 export const INITIAL_USERS = [
   {

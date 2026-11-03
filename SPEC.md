@@ -196,9 +196,9 @@ Struktur folder di dalam Backend dan Frontend ditentukan saat fasenya dikerjakan
 ## 12. Urutan Pengerjaan dan Status
 Tandai [x] jika fase selesai. Fase berbasis data/logika: backend dulu, uji dengan Postman/Thunder Client, baru frontend. Fase berbasis konten/tampilan: frontend dulu.
 
-- [ ] Fase 0: Persiapan. Repo git, `.gitignore`, `Backend/.env`, akun + API key VirusTotal, MongoDB (Atlas/lokal), `npm run dev` jalan di Frontend dan Backend
+- [x] Fase 0: Persiapan. Repo git, `.gitignore`, `Backend/.env`, akun + API key VirusTotal, MongoDB (Atlas/lokal), `npm run dev` jalan di Frontend dan Backend
 - [x] Fase 1: Kerangka frontend (tanpa backend). Navbar, sidebar, footer, routing dengan halaman kosong, halaman Login dan Register (username + password), tema Royal Blue. Selesai jika semua menu bisa diklik dan konsisten di HP dan desktop
-- [ ] Fase 2: Autentikasi. Backend (koneksi DB, model User: username, password hash, role, aktivitas terakhir; register/login, refresh/logout, middleware proteksi + requireRole, rate limit, seed admin), lalu frontend (hubungkan form login/register, state user, protected route, redirect)
+- [x] Fase 2: Autentikasi. Backend (koneksi DB, model User: username, password hash, role, aktivitas terakhir; register/login, refresh/logout, middleware proteksi + requireRole, rate limit, seed admin), lalu frontend (hubungkan form login/register, state user, protected route, redirect)
 - [ ] Fase 3: Progres Module dan Preventive. Materi tetap file Markdown di Frontend; backend: model Progress (userId, slug materi yang sudah selesai), endpoint catat dan baca progres. Isi materi wajib diverifikasi
 - [ ] Fase 4: Quiz. Backend (model Question/QuizResult; CRUD soal untuk admin di `/api/admin/questions` dengan requireRole; endpoint user ambil semua soal diacak tanpa jawaban benar + submit dan penilaian; tanpa seed, soal dibuat lewat panel admin), lalu sambungkan frontend admin halaman Quiz dan bangun ulang halaman Quiz user (quiz interaktif, feedback, skor akhir)
 - [ ] Fase 5: Dashboard VirusTotal. Backend (service, endpoint URL/file/search, cache, antrean, error limit/ukuran file), lalu frontend (tab input, tampilan hasil)

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import LoginPage from './pages/LoginPage';
@@ -20,23 +21,39 @@ import AdminProgressPage from './pages/admin/AdminProgressPage';
 import AdminQuizPage from './pages/admin/AdminQuizPage';
 import { useAdminStore } from './store/useAdminStore';
 
-function ProtectedRoute({ children }) {
+// ── Protected route user ────────────────────────────────────────────────────────
+// Tampilkan loading kosong saat sedang cek sesi (isChecking),
+// redirect ke /login jika belum terautentikasi.
+function ProtectedRoute({ children, isChecking }) {
   const { isAuthenticated } = useAuthStore();
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  if (isChecking) return null; // layar kosong sebentar saat cek cookie
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
   return children;
 }
 
-function AdminProtectedRoute({ children }) {
+// ── Protected route admin ───────────────────────────────────────────────────────
+function AdminProtectedRoute({ children, isChecking }) {
   const { isAdminAuthenticated } = useAdminStore();
-  if (!isAdminAuthenticated) {
-    return <Navigate to="/admin/login" replace />;
-  }
+  if (isChecking) return null;
+  if (!isAdminAuthenticated) return <Navigate to="/admin/login" replace />;
   return children;
 }
 
 function App() {
+  // isCheckingUser/Admin: true selama restoreSession berjalan
+  const [isCheckingUser, setIsCheckingUser] = useState(true);
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
+
+  const restoreSession = useAuthStore((s) => s.restoreSession);
+  const restoreAdminSession = useAdminStore((s) => s.restoreAdminSession);
+
+  useEffect(() => {
+    // Coba pulihkan sesi user dari cookie refresh
+    restoreSession().finally(() => setIsCheckingUser(false));
+    // Coba pulihkan sesi admin dari cookie refresh (jalur berbeda — satu tab login)
+    restoreAdminSession().finally(() => setIsCheckingAdmin(false));
+  }, [restoreSession, restoreAdminSession]);
+
   return (
     <BrowserRouter>
       {/* Toast Notifikasi Global */}
@@ -75,7 +92,7 @@ function App() {
         {/* User Protected Routes */}
         <Route
           element={
-            <ProtectedRoute>
+            <ProtectedRoute isChecking={isCheckingUser}>
               <AppLayout />
             </ProtectedRoute>
           }
@@ -97,7 +114,7 @@ function App() {
         <Route path="/admin" element={<Navigate to="/admin/user" replace />} />
         <Route
           element={
-            <AdminProtectedRoute>
+            <AdminProtectedRoute isChecking={isCheckingAdmin}>
               <AdminLayout />
             </AdminProtectedRoute>
           }

@@ -15,8 +15,8 @@ Aturan tetap: role hanya `user` dan `admin`, tanpa email, rahasia hanya di `Back
 ## Gambaran Alur
 
 ```
-Persiapan -> Rapikan frontend -> Backend dasar -> Auth -> Quiz
--> Progress -> Admin (User + Progress) -> Scan VirusTotal -> Deploy
+[x] Persiapan -> [x] Rapikan frontend -> [x] Backend dasar -> [x] Auth -> [ ] Quiz
+-> [ ] Progress -> [ ] Admin (User + Progress) -> [ ] Scan VirusTotal -> [ ] Deploy
 ```
 
 Urutan ini sengaja: Auth dulu karena semua fitur lain butuh login; Quiz sebelum Admin lainnya karena soal harus bisa dibuat admin sebelum kuis user bisa diuji; Scan terakhir karena paling rumit (batas API, upload file).
@@ -50,13 +50,11 @@ Selesai jika: pencarian "email", "siswa", dan "Trainee" di `Frontend/src` kosong
 
 Tujuan: server berdiri, tersambung ke database, siap diisi fitur.
 
-Yang dibuat:
-
-- Struktur folder Backend yang sederhana (config, models, routes, controllers, middleware)
-- Server Express yang membaca pengaturan dari `.env` dan berhenti dengan pesan jelas jika ada yang kosong
-- Koneksi ke MongoDB Atlas
-- Middleware keamanan dasar: header aman, CORS hanya untuk alamat frontend, pembaca cookie, sanitasi input, penanganan error tanpa membocorkan detail
-- Satu endpoint cek kesehatan (`/api/health`)
+- [x] Struktur folder Backend yang sederhana (config, models, routes, controllers, middleware)
+- [x] Server Express yang membaca pengaturan dari `.env` dan berhenti dengan pesan jelas jika ada yang kosong
+- [x] Koneksi ke MongoDB lokal
+- [x] Middleware keamanan dasar: header aman, CORS hanya untuk alamat frontend, pembaca cookie, sanitasi input, penanganan error tanpa membocorkan detail
+- [x] Satu endpoint cek kesehatan (`/api/health`)
 
 Selesai jika: `npm run dev` jalan, `/api/health` menjawab OK, dan log menunjukkan database terhubung.
 
@@ -64,33 +62,29 @@ Selesai jika: `npm run dev` jalan, `/api/health` menjawab OK, dan log menunjukka
 
 Tujuan: user bisa daftar, login, tetap login saat halaman di-refresh, dan logout. Admin punya pintu masuk sendiri.
 
-Yang dibuat:
-
-- Model User: username, password (di-hash), role, aktivitas terakhir, tanggal daftar
-- Register (selalu role `user`), login, refresh, logout, dan "siapa saya" (`me`)
-- Login admin di jalur terpisah, hanya menerima role `admin`
-- Pengaman route: `requireAuth` (harus login) dan `requireRole` (cek role di backend)
-- Pembatas percobaan login dan register
-- Seed akun admin dari `ADMIN_USERNAME` dan `ADMIN_PASSWORD` di `.env`
+- [x] Model User: username, password (di-hash), role, aktivitas terakhir, tanggal daftar
+- [x] Register (selalu role `user`), login, refresh, logout, dan "siapa saya" (`me`)
+- [x] Login admin di jalur terpisah, hanya menerima role `admin`
+- [x] Pengaman route: `requireAuth` (harus login) dan `requireRole` (cek role di backend)
+- [x] Pembatas percobaan login dan register
+- [x] Seed akun admin dari `ADMIN_USERNAME` dan `ADMIN_PASSWORD` di `.env`
+- [x] Sambungkan frontend: form login/register user, login admin, penanda login, route terlindungi, logout. Hapus kredensial mock admin.
 
 Cara sesi bekerja: access token singkat dikirim lewat header, refresh token di cookie httpOnly, tidak ada token di localStorage.
 
-Sambungkan frontend: form login/register user, login admin, penanda login, route terlindungi, logout. Hapus kredensial mock admin.
-
 Selesai jika: daftar, login, refresh halaman tetap login, logout, login admin berhasil, dan user biasa ditolak di area admin (403).
 
-## Langkah 4: Quiz (termasuk soal dari admin)
+## Langkah 4: Quiz (termasuk soal dari admin) [BERIKUTNYA]
 
 Tujuan: admin membuat sendiri soal dan jawaban; user mengerjakan kuis dari soal itu.
 
 Yang dibuat:
 
-- Model Question (kategori, pertanyaan, 4 pilihan, jawaban benar, penjelasan) dan QuizResult (skor, total soal, waktu)
-- Sisi admin: tambah, edit, hapus, dan lihat soal
-- Sisi user: ambil semua soal dengan urutan acak (jawaban benar tidak dikirim), kirim jawaban, penilaian dilakukan di backend, hasil disimpan
-- Tanpa seed soal dan tanpa angka tetap; jumlah soal bebas
-
-Sambungkan frontend: halaman admin Quiz (CRUD soal) dan halaman Quiz user (bangun ulang agar memuat semua soal dari backend dan menampilkan skor benar/total).
+- [ ] Model Question (kategori, pertanyaan, 4 pilihan, jawaban benar, penjelasan) dan QuizResult (skor, total soal, waktu)
+- [ ] Sisi admin: tambah, edit, hapus, dan lihat soal
+- [ ] Sisi user: ambil semua soal dengan urutan acak (jawaban benar tidak dikirim), kirim jawaban, penilaian dilakukan di backend, hasil disimpan
+- [ ] Tanpa seed soal dan tanpa angka tetap; jumlah soal bebas
+- [ ] Sambungkan frontend: halaman admin Quiz (CRUD soal) dan halaman Quiz user (bangun ulang agar memuat semua soal dari backend dan menampilkan skor benar/total)
 
 Selesai jika: admin membuat beberapa soal, user menyelesaikan satu sesi penuh, skor tersimpan, dan bank kosong menampilkan "Belum ada soal kuis".
 
@@ -100,11 +94,10 @@ Tujuan: sistem tahu materi mana yang sudah dibaca tiap user.
 
 Yang dibuat:
 
-- Model Progress: user dan daftar slug materi yang selesai
-- Catat materi selesai dan baca progres sendiri
-- Backend hanya menerima slug yang sah (6 Module dan 7 Preventive); isi materi tetap file di Frontend
-
-Sambungkan frontend: tombol/penanda selesai di halaman Module dan Preventive, serta ringkasan progres di popover profil Navbar.
+- [ ] Model Progress: user dan daftar slug materi yang selesai
+- [ ] Catat materi selesai dan baca progres sendiri
+- [ ] Backend hanya menerima slug yang sah (6 Module dan 7 Preventive); isi materi tetap file di Frontend
+- [ ] Sambungkan frontend: tombol/penanda selesai di halaman Module dan Preventive, serta ringkasan progres di popover profil Navbar
 
 Selesai jika: membaca materi menambah angka progres (misal 3/6) dan angka bertahan setelah logout dan login lagi.
 
@@ -114,12 +107,11 @@ Tujuan: admin bisa melihat, memantau, dan menghapus user.
 
 Yang dibuat:
 
-- Daftar user (dengan pencarian) dan detail user
-- Hapus user, ikut menghapus progres dan hasil kuisnya; akun admin tidak bisa dihapus
-- Progres semua user: Module x/6, Preventive x/7, skor kuis terakhir dan tertinggi
-- Semua route admin lewat `requireAuth` dan `requireRole('admin')`; respons tidak pernah memuat hash password atau token
-
-Sambungkan frontend: halaman User dan Progress di admin panel.
+- [ ] Daftar user (dengan pencarian) dan detail user
+- [ ] Hapus user, ikut menghapus progres dan hasil kuisnya; akun admin tidak bisa dihapus
+- [ ] Progres semua user: Module x/6, Preventive x/7, skor kuis terakhir dan tertinggi
+- [ ] Semua route admin lewat `requireAuth` dan `requireRole('admin')`; respons tidak pernah memuat hash password atau token
+- [ ] Sambungkan frontend: halaman User dan Progress di admin panel
 
 Selesai jika: daftar user tampil nyata, hapus user bekerja dengan konfirmasi, progres sesuai aktivitas user, dan user biasa tidak bisa memanggil route admin.
 
@@ -129,12 +121,11 @@ Tujuan: dashboard scan memakai VirusTotal sungguhan tanpa membocorkan API key.
 
 Yang dibuat:
 
-- Layanan yang memanggil VirusTotal dari backend (API key hanya di `.env`)
-- Scan URL, scan file (upload), dan pencarian hash/domain/IP
-- Cache hasil dan antrean agar tidak melewati batas request gratis
-- Pesan error jelas untuk batas tercapai dan file terlalu besar; file upload tidak disimpan ke disk
-
-Sambungkan frontend: tiga tab di Scanner, ganti data demo dengan hasil asli.
+- [ ] Layanan yang memanggil VirusTotal dari backend (API key hanya di `.env`)
+- [ ] Scan URL, scan file (upload), dan pencarian hash/domain/IP
+- [ ] Cache hasil dan antrean agar tidak melewati batas request gratis
+- [ ] Pesan error jelas untuk batas tercapai dan file terlalu besar; file upload tidak disimpan ke disk
+- [ ] Sambungkan frontend: tiga tab di Scanner, ganti data demo dengan hasil asli
 
 Selesai jika: scan URL dan pencarian hash menampilkan hasil nyata, dan batas ditangani dengan pesan yang rapi.
 
@@ -142,11 +133,11 @@ Selesai jika: scan URL dan pencarian hash menampilkan hasil nyata, dan batas dit
 
 Tujuan: web bisa diakses publik dengan aman.
 
-- Audit keamanan: tidak ada secret di kode atau repo, cookie dan CORS benar untuk production, respons tidak membocorkan data, `npm audit` bersih
-- Hapus sisa data mock di frontend
-- Siapkan variabel lingkungan untuk production
-- Deploy: Backend ke Render/Railway, Frontend ke Vercel/Netlify, database tetap di Atlas
-- Jalankan seed admin sekali di database production dengan password baru yang kuat
+- [ ] Audit keamanan: tidak ada secret di kode atau repo, cookie dan CORS benar untuk production, respons tidak membocorkan data, `npm audit` bersih
+- [ ] Hapus sisa data mock di frontend
+- [ ] Siapkan variabel lingkungan untuk production
+- [ ] Deploy: Backend ke Render/Railway, Frontend ke Vercel/Netlify, database tetap di Atlas
+- [ ] Jalankan seed admin sekali di database production dengan password baru yang kuat
 
 Selesai jika: kamu bisa mendaftar, login, mengerjakan kuis, dan login admin dari alamat publik.
 
@@ -154,12 +145,12 @@ Selesai jika: kamu bisa mendaftar, login, mengerjakan kuis, dan login admin dari
 
 ## Penanda Versi (opsional, pakai git tag)
 
-- `v0.1.0` frontend selesai dengan data mock
-- `v0.2.0` auth tersambung
-- `v0.3.0` quiz tersambung
-- `v0.4.0` progress dan admin tersambung
-- `v0.5.0` scan tersambung
-- `v1.0.0` siap deploy
+- [x] `v0.1.0` frontend selesai dengan data mock
+- [x] `v0.2.0` auth tersambung
+- [ ] `v0.3.0` quiz tersambung
+- [ ] `v0.4.0` progress dan admin tersambung
+- [ ] `v0.5.0` scan tersambung
+- [ ] `v1.0.0` siap deploy
 
 ## Catatan Hosting yang Perlu Diingat Sejak Awal
 
