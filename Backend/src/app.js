@@ -14,6 +14,7 @@ import authRouter from './routes/auth.route.js';
 import adminRouter from './routes/admin.route.js';
 import quizRouter from './routes/quiz.route.js';
 import progressRouter from './routes/progress.route.js';
+import scanRouter from './routes/scan.route.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -71,6 +72,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/quiz', quizRouter);
 app.use('/api/progress', progressRouter);
+app.use('/api/scan', scanRouter);
 
 // ── Fallthrough handlers ────────────────────────────────────────────────────────
 app.use(notFoundHandler);

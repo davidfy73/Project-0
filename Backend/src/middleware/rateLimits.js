@@ -31,3 +31,17 @@ export const registerLimiter = rateLimit({
   legacyHeaders: false,
   handler: jsonHandler('Terlalu banyak percobaan pendaftaran. Coba lagi setelah 1 jam.'),
 });
+
+/**
+ * Scan rate limiter per user:
+ * Maksimal 20 request scan per 5 menit per user.
+ * Dipasang setelah requireAuth agar req.user._id tersedia.
+ */
+export const scanUserLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  limit: 20,
+  keyGenerator: (req) => req.user?._id?.toString() || req.ip,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  handler: jsonHandler('Terlalu banyak permintaan scan dari akun Anda. Coba lagi dalam beberapa menit.'),
+});

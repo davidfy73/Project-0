@@ -16,7 +16,7 @@ Aturan tetap: role hanya `user` dan `admin`, tanpa email, rahasia hanya di `Back
 
 ```
 [x] Persiapan -> [x] Rapikan frontend -> [x] Backend dasar -> [x] Auth -> [x] Quiz
--> [x] Progress -> [x] Admin (User + Progress) -> [ ] Scan VirusTotal -> [ ] Deploy
+-> [x] Progress -> [x] Admin (User + Progress) -> [x] Scan VirusTotal -> [ ] Deploy
 ```
 
 Urutan ini sengaja: Auth dulu karena semua fitur lain butuh login; Quiz sebelum Admin lainnya karena soal harus bisa dibuat admin sebelum kuis user bisa diuji; Scan terakhir karena paling rumit (batas API, upload file).
@@ -115,21 +115,21 @@ Yang dibuat:
 
 Selesai jika: daftar user tampil nyata, hapus user bekerja dengan konfirmasi, progres sesuai aktivitas user, dan user biasa tidak bisa memanggil route admin.
 
-## Langkah 7: Scan VirusTotal [BERIKUTNYA]
+## Langkah 7: Scan VirusTotal
 
 Tujuan: dashboard scan memakai VirusTotal sungguhan tanpa membocorkan API key.
 
 Yang dibuat:
 
-- [ ] Layanan yang memanggil VirusTotal dari backend (API key hanya di `.env`)
-- [ ] Scan URL, scan file (upload), dan pencarian hash/domain/IP
-- [ ] Cache hasil dan antrean agar tidak melewati batas request gratis
-- [ ] Pesan error jelas untuk batas tercapai dan file terlalu besar; file upload tidak disimpan ke disk
-- [ ] Sambungkan frontend: tiga tab di Scanner, ganti data demo dengan hasil asli
+- [x] Layanan yang memanggil VirusTotal dari backend (API key hanya di `.env`)
+- [x] Scan URL, scan file (upload), dan pencarian hash/domain/IP
+- [x] Cache hasil dan antrean agar tidak melewati batas request gratis
+- [x] Pesan error jelas untuk batas tercapai dan file terlalu besar; file upload tidak disimpan ke disk
+- [x] Sambungkan frontend: tiga tab di Scanner, ganti data demo dengan hasil asli
 
 Selesai jika: scan URL dan pencarian hash menampilkan hasil nyata, dan batas ditangani dengan pesan yang rapi.
 
-## Langkah 8: Finishing dan Deploy
+## Langkah 8: Finishing dan Deploy [BERIKUTNYA]
 
 Tujuan: web bisa diakses publik dengan aman.
 
@@ -149,7 +149,7 @@ Selesai jika: kamu bisa mendaftar, login, mengerjakan kuis, dan login admin dari
 - [x] `v0.2.0` auth tersambung
 - [x] `v0.3.0` quiz tersambung
 - [x] `v0.4.0` progress dan admin tersambung
-- [ ] `v0.5.0` scan tersambung
+- [x] `v0.5.0` scan tersambung
 - [ ] `v1.0.0` siap deploy
 
 ## Catatan Hosting yang Perlu Diingat Sejak Awal

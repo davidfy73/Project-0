@@ -21,8 +21,8 @@ const envSchema = z.object({
   ADMIN_USERNAME: z.string().min(1),
   ADMIN_PASSWORD: z.string().min(1),
 
-  // Variabel opsional — boleh kosong, hanya peringatan saat start
-  VIRUSTOTAL_API_KEY: z.string().optional(),
+  // Variabel wajib
+  VIRUSTOTAL_API_KEY: z.string().min(1, 'VIRUSTOTAL_API_KEY wajib diisi.'),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -34,9 +34,5 @@ if (!parsed.success) {
 }
 
 const env = parsed.data;
-
-if (!env.VIRUSTOTAL_API_KEY) {
-  console.warn('[env] Peringatan: VIRUSTOTAL_API_KEY tidak diisi. Fitur scan VirusTotal tidak akan berfungsi.');
-}
 
 export default env;
