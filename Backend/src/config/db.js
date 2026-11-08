@@ -13,7 +13,6 @@ export async function connectDB() {
     console.log('[db] MongoDB terhubung.');
   } catch (err) {
     console.error('[db] Gagal terhubung ke MongoDB:', err.message);
-    process.exit(1);
   }
 }
 

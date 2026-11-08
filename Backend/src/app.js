@@ -35,16 +35,22 @@ const allowedOrigins = [
   env.CLIENT_URL,
   ...(env.NODE_ENV !== 'production'
     ? [
-        env.CLIENT_URL.includes('localhost')
+        env.CLIENT_URL?.includes('localhost')
           ? env.CLIENT_URL.replace('localhost', '127.0.0.1')
-          : env.CLIENT_URL.replace('127.0.0.1', 'localhost'),
+          : env.CLIENT_URL?.replace('127.0.0.1', 'localhost'),
       ]
     : []),
-];
+].filter(Boolean);
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Izinkan jika tanpa origin (same-origin CloudFront request, curl, internal health check)
+      if (!origin) return callback(null, true);
+      // Izinkan origin yang terdaftar atau same-domain
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(null, true);
+    },
     credentials: true,
   })
 );

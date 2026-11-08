@@ -1,7 +1,7 @@
 // lib/api.js
 // Axios instance terpusat untuk semua panggilan ke backend PHISHYEARN.
 //
-// - baseURL dibaca dari variabel Vite (VITE_API_URL) atau fallback ke localhost
+// - baseURL menggunakan path relatif secara default (didukung Vite proxy di dev & CloudFront di prod)
 // - withCredentials: true agar cookie refresh token ikut dikirim di setiap request
 // - Interceptor response: jika 401 dari endpoint selain /refresh dan /login,
 //   coba refresh token sekali, lalu ulangi request. Jika refresh juga gagal,
@@ -9,7 +9,7 @@
 
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
+const BASE_URL = import.meta.env.VITE_API_URL || '';
 
 const api = axios.create({
   baseURL: BASE_URL,

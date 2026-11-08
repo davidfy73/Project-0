@@ -49,7 +49,7 @@ export default function LoginPage() {
       const message =
         err.response?.data?.message ??
         (!err.response
-          ? 'Gagal terhubung ke server backend. Pastikan server backend sudah dijalankan di port 5000.'
+          ? 'Gagal terhubung ke server backend. Pastikan server backend sedang aktif.'
           : 'Terjadi kesalahan. Coba lagi.');
       setError('root', { message });
       toast.error(message);

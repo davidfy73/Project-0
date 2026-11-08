@@ -59,12 +59,18 @@ function setRefreshCookie(res, token) {
     path: '/api/auth',
     maxAge: env.REFRESH_TOKEN_EXPIRES_DAYS * 24 * 60 * 60 * 1000,
     secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
+    sameSite: 'lax',
   });
 }
 
 function clearRefreshCookie(res) {
-  res.clearCookie('refreshToken', { httpOnly: true, path: '/api/auth' });
+  const isProd = env.NODE_ENV === 'production';
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    path: '/api/auth',
+    secure: isProd,
+    sameSite: 'lax',
+  });
 }
 
 // ── Handler: register ──────────────────────────────────────────────────────────

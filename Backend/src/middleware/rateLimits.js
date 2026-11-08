@@ -41,6 +41,7 @@ export const scanUserLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   limit: 20,
   keyGenerator: (req) => req.user?._id?.toString() || req.ip,
+  validate: { keyGeneratorIpFallback: false },
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   handler: jsonHandler('Terlalu banyak permintaan scan dari akun Anda. Coba lagi dalam beberapa menit.'),

@@ -47,7 +47,7 @@ export const useAdminStore = create((set, get) => ({
       const message =
         err.response?.data?.message ??
         (!err.response
-          ? 'Gagal terhubung ke server backend. Pastikan server backend sudah dijalankan di port 5000.'
+          ? 'Gagal terhubung ke server backend. Pastikan server backend sedang aktif.'
           : 'Username atau password salah.');
       return { success: false, message };
     }

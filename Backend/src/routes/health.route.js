@@ -9,6 +9,7 @@ const router = Router();
 router.get('/', (req, res) => {
   const dbConnected = isDBConnected();
   res.status(200).json({
+    ok: true,
     status: 'ok',
     database: dbConnected ? 'connected' : 'disconnected',
   });
